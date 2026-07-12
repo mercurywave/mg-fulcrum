@@ -1,0 +1,63 @@
+# local test stuff
+Demo/
+
+## Visual Studio / .NET Core / .NET 5+
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Visual Studio 2015/2017 cache/options
+.vs/
+
+## Visual Studio 2019+
+Demo/.vscode/
+Fulcrum/.vscode/
+
+## MSTest test results
+TestResults/
+*[Tt]est*.xml
+
+## NuGet Packages
+*.nupkg
+**/packages/*
+!packages/*.props
+
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## ASP.NET Core
+appsettings.json
+appsettings.*.json
+appsettings.local.json
+
+## Visual Studio cache/history
+_ide*
+*.iml
+
+## IIS Express
+*.iisexpress.xml
+
+## Log Files
+*.log
+logs/
+
+## Carriage return / unicode
+*.swp
+*.swo
+
+## Rider
+.idea/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
