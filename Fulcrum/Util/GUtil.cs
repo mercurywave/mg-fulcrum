@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Fulcrum;
 
-public static class Util
+public static class GUtil
 {
     static Random _rand = new Random();
 
@@ -116,5 +116,59 @@ public static class Util
     {
         return Pick(rand, (I[])Enum.GetValues(enumeration));
     }
+    #endregion
+
+    #region String stuff
+
+
+    //append another piece to end (useful for multi-line output when some lines are blank)
+    public static string AppendPiece(string start, string splitter, string append)
+    {
+        if (start == "") return append;
+        return start + splitter + append;
+    }
+
+    // always returns at least one, I don't kno why...
+    public static string RepeatString(string str, int count, string delimiter = "")
+    {
+        var output = str;
+        for (int i = 0; i < count - 1; i++)
+            output += delimiter + str;
+        return output;
+    }
+
+    //safe and lazy sub string - so if you go over the length it returns up to the end
+    public static string BoundedSubstr(string str, int start, int length)
+    {
+        if (start < 0) { length += start; start = 0; }
+        if (start + length > str.Length) length = str.Length - start;
+        if (length <= 0) return "";
+        return str.Substring(start, length);
+    }
+    public static string BoundedSubstr(string str, int start)
+        => BoundedSubstr(str, start, str.Length - start);
+
+    public static string AppendLine(string start, string append) { return AppendPiece(start, "\n", append); }
+
+    public static string Piece(string str, string delim, int pc, int pcTo = -1)
+    {
+        int start, end;
+        if (pcTo < 0) pcTo = pc;
+        start = DelimPos(str, delim, pc - 1);
+        end = DelimPos(str, delim, pcTo, start, pc - 1);
+        if (start == end) return "";
+        return str.Substring(start + 1, end - start - 1);
+    }
+    static int DelimPos(string str, string delim, int pc, int start = -1, int startPc = 0)
+    {
+        if (pc <= startPc) return start;
+        for (; startPc < pc && start < str.Length; startPc++)
+        {
+            start = str.IndexOf(delim, start + 1);
+            if (start < 0) return str.Length;
+        }
+        return start;
+    }
+
     #endregion
 }
