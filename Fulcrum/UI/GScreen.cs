@@ -18,7 +18,6 @@ public static class GScreen
     public static int SafeWidth, SafeHeight;
     public static bool IsWide;
     public static bool IsPortrait;
-    internal static SpriteBatch sb;
     static int screenW, screenH;
     public static GraphicsDevice device;
     public static GraphicsDeviceManager _graphics;
@@ -64,7 +63,7 @@ public static class GScreen
 
         Resize(fullscreen, w, h);
         //ScaleTransform = Matrix.CreateScale(Scale, Scale, 1);
-        sb = new SpriteBatch(device);
+        GDraw.sb = new SpriteBatch(device);
         _initizlized = true;
     }
 
@@ -167,7 +166,7 @@ public static class GScreen
         IsPortrait = (screenH > screenW);
 
 
-        sb = new SpriteBatch(device);
+        GDraw.sb = new SpriteBatch(device);
 
         if (!ApplicationSetsScale)
         {

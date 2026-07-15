@@ -70,6 +70,7 @@ public static class GPerf
 
     public static void BeginBlock(string key) => _Log(key, eMajorTraceType.Other, eEventPhase.Begin);
     public static void EndBlock() => _Log("", eMajorTraceType.Other, eEventPhase.End);
+    public static IDisposable UseBlock(string key) { return new ODisposable(() => BeginBlock(key), () => EndBlock()); }
     internal static void _BeginAsyncBlock(string key, int jobId) => _Log(key, eMajorTraceType.Async, eEventPhase.Begin, jobId);
     internal static void _EndAsyncBlock(int jobId) => _Log("", eMajorTraceType.Async, eEventPhase.End, jobId);
     public static void LogText(string text) => _Log(text, eMajorTraceType.Other, eEventPhase.Event);
