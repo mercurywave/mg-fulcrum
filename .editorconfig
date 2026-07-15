@@ -38,22 +38,3 @@ csharp_space_between_method_call_parameter_list_parentheses = false
 csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
 csharp_space_between_method_declaration_name_and_method_parentheses = false
 
-# Naming conventions
-dotnet_naming_rule.interface_should_be_pascal_case.severity = suggestion
-dotnet_naming_rule.interface_should_be_pascal_case.symbols  = interface
-dotnet_naming_rule.interface_should_be_pascal_case.style    = pascal_case
-dotnet_naming_rule.interface_should_be_pascal_case.style.capitalization = camel_case
-dotnet_naming_rule.types_should_be_pascal_case.severity = suggestion
-dotnet_naming_rule.types_should_be_pascal_case.symbols  = types
-dotnet_naming_rule.types_should_be_pascal_case.style    = pascal_case
-dotnet_naming_rule.types_should_be_pascal_case.style.capitalization = pascal_case
-dotnet_naming_symbols.interface.applicable_accessibility         = public
-dotnet_naming_symbols.interface.applicable_tags                  = 'interface'
-dotnet_naming_symbols.interface.style                            = camel_case
-dotnet_naming_symbols.types.applicable_accessibility             = public
-dotnet_naming_symbols.types.applicable_tags                      = 'type'
-dotnet_naming_symbols.types.style                                = pascal_case
-dotnet_naming_style.pascal_case.capitalization = pascal_case
-dotnet_naming_style.camel_case.capitalization = camel_case
-dotnet_naming_style.interface.capitalization = camel_case
-dotnet_naming_style.type_parameter.capitalization = pascal_case

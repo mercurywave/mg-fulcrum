@@ -7,6 +7,8 @@ namespace Fulcrum;
 
 public static class GUtil
 {
+
+    #region Quick picks
     static Random _rand = new Random();
 
     public static void Shuffle<A>(A[] list, Random seed = null)
@@ -31,8 +33,6 @@ public static class GUtil
             list[rand] = temp;
         }
     }
-
-    #region Quick picks
 
     public static I QuickPick<I>(params I[] arr)
     {
@@ -169,6 +169,5 @@ public static class GUtil
         }
         return start;
     }
-
     #endregion
 }

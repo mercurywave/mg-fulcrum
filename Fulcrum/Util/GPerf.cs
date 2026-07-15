@@ -41,8 +41,8 @@ public static class GPerf
 
         if (active.Count > 0)
         {
-            var frameEnd = Now();
-            long calcDur(eMajorTraceType type)
+            var frameEnd = new Tick();
+            Tick calcDur(eMajorTraceType type)
             {
                 var start = frameEnd;
                 var end = frameEnd;
@@ -93,7 +93,7 @@ public static class GPerf
 
 
     static List<TraceEvent> GetEventsForFrame(FrameInfo frame, bool incAsync)
-        => GetEventsForFrame(frame.Tick, incAsync);
+        => GetEventsForFrame(frame.Frame, incAsync);
     static List<TraceEvent> GetEventsForFrame(int tick, bool incAsync)
     {
         // caution: events are in reverse-chronological order
@@ -104,8 +104,8 @@ public static class GPerf
             for (int i = 0; i < _events.Count; i++)
             {
                 var ev = _events.Get(i);
-                if (ev.Tick < tick - 1) break; // definitely too old
-                if (ev.Tick != tick) continue; // not work considering
+                if (ev.Frame < tick - 1) break; // definitely too old
+                if (ev.Frame != tick) continue; // not work considering
                 if (!incAsync && ev.JobId != 0) continue;
                 active.Add(ev);
             }
@@ -116,8 +116,8 @@ public static class GPerf
     {
         lock (_events)
         {
-            if (_events.Count == 0) return FulcrumGame._Tick + 1;
-            return _events.Get(_events.Count - 1).Tick + 1;
+            if (_events.Count == 0) return FulcrumGame._Frame + 1;
+            return _events.Get(_events.Count - 1).Frame + 1;
         }
     }
 }
@@ -126,19 +126,19 @@ internal struct FrameInfo
 {
     public enum eProblemLevel { Normal, Warn, High, Extreme }
 
-    public int Tick;
-    public long UpdateLength;
-    public long RenderLength;
-    public long DrawLength;
+    public int Frame;
+    public Tick UpdateLength;
+    public Tick RenderLength;
+    public Tick DrawLength;
     public eProblemLevel Abnormal;
     public string KeyFrame;
-    public FrameInfo(int tick, long update, long render, long draw, string keyFrame)
+    public FrameInfo(int frame, Tick update, Tick render, Tick draw, string keyFrame)
     {
-        Tick = tick;
+        Frame = frame;
         UpdateLength = update;
         RenderLength = render;
         DrawLength = draw;
-        var dur = GPerf.DurationMs(update + render + draw);
+        var dur = (update + render + draw).Milliseconds;
         if (dur > 25)
             Abnormal = eProblemLevel.Extreme;
         else if (dur > 14)
@@ -166,16 +166,16 @@ internal struct FrameInfo
 }
 internal struct TraceEvent
 {
-    public int Tick;
+    public int Frame;
     public int JobId; // 0 for non-job
-    public long TimeStamp;
+    public Tick TimeStamp;
     public GPerf.eMajorTraceType MajorType;
     public GPerf.eEventPhase Phase;
     public string Key;
-    public TraceEvent(int tick, string key, GPerf.eMajorTraceType majorType, GPerf.eEventPhase phase, int jobId = 0)
+    public TraceEvent(int frame, string key, GPerf.eMajorTraceType majorType, GPerf.eEventPhase phase, int jobId = 0)
     {
-        Tick = tick;
-        TimeStamp = Stopwatch.GetTimestamp();
+        Frame = frame;
+        TimeStamp = new Tick();
         Key = key;
         Phase = phase;
         MajorType = majorType;
