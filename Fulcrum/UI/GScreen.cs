@@ -279,4 +279,9 @@ public static class GScreen
         SafeHeight = h * 8 / 10;
         AspectRatio = (float)w / h;
     }
+
+    public static int Pad(int normalPixelDim)
+    {
+        return (int)(normalPixelDim * Scale);
+    }
 }
