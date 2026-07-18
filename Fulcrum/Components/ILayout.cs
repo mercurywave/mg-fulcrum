@@ -12,7 +12,7 @@ internal enum eDimensionFlag { None = 0, Left = 1, Top = 2, Right = 4, Bottom = 
 
 public interface ILayout
 {
-    OLayout Layout { get; set; }
+    public OLayout Layout { get; set; }
     public int Left => Layout.Left;
     public int Top => Layout.Top;
     public int Width => Layout.Width;
@@ -24,7 +24,8 @@ public interface ILayout
 public class OLayout
 {
     internal Rectangle Rect;
-    internal bool LayoutDirty;
+    internal eDimensionFlag BoundDims;
+    internal static bool Dirty = false;
     public int Left => Rect.X;
     public int Top => Rect.Y;
     public int Width => Rect.Width;
@@ -32,80 +33,78 @@ public class OLayout
     public int Right => Rect.Right;
     public int Bottom => Rect.Bottom;
 
-    
-    public OConstraint Bind(eEdge edge, int value)
+    private bool IsDimBound(eEdge edge) => (BoundDims & edge.AsFlag()) > 0;
+    private bool IsDimBound(eSize size) => (BoundDims & size.AsFlag()) > 0;
+
+    public bool IsSizeBound(eSize size) =>
+        IsDimBound(size) || (IsDimBound(size.AxisEdge(false)) && IsDimBound(size.AxisEdge(false)));
+    public bool IsEdgeBound(eEdge edge) =>
+        IsDimBound(edge) || (IsDimBound(edge.Opposite()) && IsDimBound(edge.AxisSize()));
+
+    public OLayout Bind(eEdge edge, int value)
     {
-        var constraint = new OConstraint(this, eDimensionFlag.None);
-        return constraint.Bind(edge, value);
+        var opp = IsDimBound(edge.Opposite());
+        var size = IsDimBound(edge.AxisSize());
+        Debug.Assert(!opp || !size);
+        if (opp)
+            StretchEdge(edge, value);
+        else
+            ShiftEdge(edge, value);
+        BoundDims |= edge.AsFlag();
+        return this;
     }
-    public OConstraint Bind(eSize size, int value)
+    public OLayout Bind(eSize size, int value)
     {
-        var constraint = new OConstraint(this, eDimensionFlag.None);
-        return constraint.Bind(size, value);
+        var min = IsDimBound(size.AxisEdge(false));
+        var max = IsDimBound(size.AxisEdge(true));
+        Debug.Assert(!min || !max);
+        StretchFromEdge(size, value, max);
+        BoundDims |= size.AsFlag();
+        return this;
     }
-    public OConstraint Bind(eDimension dim, int value)
-    {
-        var constraint = new OConstraint(this, eDimensionFlag.None);
-        return constraint.Bind(dim, value);
-    }
+    public OLayout Bind(eDimension dim, int value) =>
+        dim.IsSize() ? Bind(dim.AsSize(), value) : Bind(dim.AsEdge(), value);
 
     internal void StretchEdge(eEdge edge, int value)
     {
         var replacement = Rect.CopyStretchEdge(edge, value);
         if (replacement == Rect) return;
         Rect = replacement;
-        LayoutDirty = true;
+        Dirty = true;
     }
     internal void ShiftEdge(eEdge edge, int value)
     {
         var replacement = Rect.CopyShiftEdge(edge, value);
         if (replacement == Rect) return;
         Rect = replacement;
-        LayoutDirty = true;
+        Dirty = true;
     }
     internal void StretchFromEdge(eSize size, int value, bool fromHighEdge)
     {
         var replacement = Rect.CopyStretchSizeFromEdge(size, value, fromHighEdge);
         if (replacement == Rect) return;
         Rect = replacement;
-        LayoutDirty = true;
+        Dirty = true;
     }
-
 }
 
-public struct OConstraint
+public interface ILayoutTransform : ILayout
 {
-    internal OLayout Layout;
-    internal eDimensionFlag DimsSet;
-    internal OConstraint(OLayout layout, eDimensionFlag dims)
+    // these are both additive so that they can be started at 0
+    public Vector2 RelativeTransformPos { get; set; }
+    public Vector2 RelativeTransformSize { get; set; }
+    public FRectangle TransformedLayout =>
+        new FRectangle(
+            Layout.Rect.GetTopLeft().ToVector2() + RelativeTransformPos,
+            Layout.Rect.Size.ToVector2() + RelativeTransformSize
+        );
+    public void TransformScale(Vector2 scaleMod)
     {
-        Layout = layout;
-        DimsSet = dims;
+        RelativeTransformSize = Layout.Rect.Size.ToVector2() * scaleMod;
     }
-    internal bool IsDimSet(eDimension dim) => (DimsSet & dim.AsFlag()) > 0;
-    internal bool IsDimSet(eEdge edge) => (DimsSet & edge.AsFlag()) > 0;
-    internal bool IsDimSet(eSize size) => (DimsSet & size.AsFlag()) > 0;
+}
 
-    public OConstraint Bind(eEdge edge, int value)
-    {
-        var opp = IsDimSet(edge.Opposite());
-        var size = IsDimSet(edge.AxisSize());
-        Debug.Assert(!opp || !size);
-        if (opp)
-            Layout.StretchEdge(edge, value);
-        else
-            Layout.ShiftEdge(edge, value);
-        return new OConstraint(Layout, DimsSet | edge.AsFlag());
-    }
-    public OConstraint Bind(eSize size, int value)
-    {
-        var min = IsDimSet(size.AxisEdge(false));
-        var max = IsDimSet(size.AxisEdge(true));
-        Debug.Assert(!min || !max);
-        Layout.StretchFromEdge(size, value, max);
-        return new OConstraint(Layout, DimsSet | size.AsFlag());
-    }
-    public OConstraint Bind(eDimension dim, int value) =>
-        dim.IsSize() ? Bind(dim.AsSize(), value) : Bind(dim.AsEdge(), value);
-
+public class OLayoutTransform
+{
+    internal Vector4 Transform = Vector4.Zero;
 }

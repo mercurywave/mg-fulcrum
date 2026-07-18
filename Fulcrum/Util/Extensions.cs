@@ -84,6 +84,14 @@ public static class RectangleExtensions
             _ => throw new NotImplementedException(),
         };
 
+    public static Vector4 ToVector4(this Rectangle rect) =>
+        new Vector4(rect.X, rect.Y, rect.Width, rect.Height);
+    public static FRectangle ToFloatRect(this Rectangle rect)
+        => new FRectangle(rect.X, rect.Y, rect.Width, rect.Height);
+    public static Point GetTopLeft(this Rectangle rect)
+        => new Point(rect.X, rect.Y);
+    public static Point GetBottomRight(this Rectangle rect)
+        => new Point(rect.X + rect.Width, rect.Y + rect.Height);
 }
 
 
