@@ -19,13 +19,13 @@ public interface ILayout
     public int Height => Layout.Height;
     public int Right => Layout.Right;
     public int Bottom => Layout.Bottom;
+    public void OnLayout();
 }
 
 public class OLayout
 {
     internal Rectangle Rect;
     internal eDimensionFlag BoundDims;
-    internal static bool Dirty = false;
     public int Left => Rect.X;
     public int Top => Rect.Y;
     public int Width => Rect.Width;
@@ -70,21 +70,21 @@ public class OLayout
         var replacement = Rect.CopyStretchEdge(edge, value);
         if (replacement == Rect) return;
         Rect = replacement;
-        Dirty = true;
+        GLayoutEngine.Dirty = true;
     }
     internal void ShiftEdge(eEdge edge, int value)
     {
         var replacement = Rect.CopyShiftEdge(edge, value);
         if (replacement == Rect) return;
         Rect = replacement;
-        Dirty = true;
+        GLayoutEngine.Dirty = true;
     }
     internal void StretchFromEdge(eSize size, int value, bool fromHighEdge)
     {
         var replacement = Rect.CopyStretchSizeFromEdge(size, value, fromHighEdge);
         if (replacement == Rect) return;
         Rect = replacement;
-        Dirty = true;
+        GLayoutEngine.Dirty = true;
     }
 }
 

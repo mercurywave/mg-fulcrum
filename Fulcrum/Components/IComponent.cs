@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Fulcrum;
 
-public interface IComponentContainer
+public interface IComponentContainer : IComponent
 {
     internal List<IComponent> _childComponents { get; set; }
 
@@ -34,7 +34,7 @@ public interface IComponentContainer
     {
         foreach (var child in Children.ToArray())
         {
-            if(child is T tChild)
+            if (child is T tChild)
                 action(tChild);
             if (child is IComponentContainer container)
                 container.WalkTree(action);
@@ -42,7 +42,13 @@ public interface IComponentContainer
     }
 }
 
-public class IComponent
+public interface IComponent
 {
-    public IComponentContainer ParentContainer;
+    public IComponentContainer ParentContainer { get; set; }
+}
+
+public class BaseComponent : IComponent
+{
+    public IComponentContainer ParentContainer { get; set; }
+    public BaseComponent() { ParentContainer = null; }
 }
