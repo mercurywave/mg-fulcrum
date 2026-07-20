@@ -121,6 +121,50 @@ public static class GPerf
             return _events.Get(_events.Count - 1).Frame + 1;
         }
     }
+
+
+    #region Async logging
+    // you may get a null! only use .LogAsync to write, or check for null dilligently
+    public static AsyncLog GetAsyncLogger(string key)
+    {
+        if (!Enabled) return null;
+        return new AsyncLog(key);
+    }
+    public static void LogAsync(AsyncLog log, string key)
+    {
+        if (!Enabled) return;
+        if (log == null) return;
+        log.Log(key);
+    }
+
+    public class AsyncLog : IDisposable
+    {
+        internal int JobId;
+        internal string Name;
+        static int _id = 1;
+        internal AsyncLog(string key)
+        {
+            JobId = _id++;
+            Name = key;
+            if (Enabled)
+                _BeginAsyncBlock(key, JobId);
+        }
+        internal void Log(string key)
+        {
+            // this is internal because you want to route through the static functions
+            // if perf isn't enabled, the creation function will return null
+            // so you'll forget that you have a null object and get dumb crashes in release builds
+            if (Enabled)
+                _Log(key, eMajorTraceType.Other, eEventPhase.Event, JobId);
+        }
+
+        public void Dispose()
+        {
+            if (Enabled)
+                _EndAsyncBlock(JobId);
+        }
+    }
+    #endregion
 }
 
 internal struct FrameInfo
