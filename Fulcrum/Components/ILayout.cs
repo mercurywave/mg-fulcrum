@@ -10,28 +10,53 @@ public enum eSize { Width = 16, Height = 32 }
 [Flags]
 internal enum eDimensionFlag { None = 0, Left = 1, Top = 2, Right = 4, Bottom = 8, Width = 16, Height = 32 }
 
-public interface ILayout
+public interface ILayout : IComponent
 {
     public OLayout Layout { get; set; }
-    public int Left => Layout.Left;
-    public int Top => Layout.Top;
-    public int Width => Layout.Width;
-    public int Height => Layout.Height;
-    public int Right => Layout.Right;
-    public int Bottom => Layout.Bottom;
     public void OnLayout();
+}
+public interface IViewport : ILayout
+{
+    // scroll offset for child components from the top left of the viewport
+    // e.g. 100,0 is scrolled down 100 pixels
+    // width and height are scrollable area, set by framework to the maximum of children by default
+    public OLayout Viewport { get; set; }
 }
 
 public class OLayout
 {
-    internal Rectangle Rect;
-    internal eDimensionFlag BoundDims;
-    public int Left => Rect.X;
-    public int Top => Rect.Y;
-    public int Width => Rect.Width;
-    public int Height => Rect.Height;
-    public int Right => Rect.Right;
-    public int Bottom => Rect.Bottom;
+    internal Rectangle Rect = new Rectangle(0, 0, 0, 0);
+    internal eDimensionFlag BoundDims = eDimensionFlag.None;
+    public int Left
+    {
+        get => Rect.X;
+        set => Bind(eEdge.Left, value);
+    }
+    public int Top
+    {
+        get => Rect.Y;
+        set => Bind(eEdge.Top, value);
+    }
+    public int Width
+    {
+        get => Rect.Width;
+        set => Bind(eSize.Width, value);
+    }
+    public int Height
+    {
+        get => Rect.Height;
+        set => Bind(eSize.Height, value);
+    }
+    public int Right
+    {
+        get => Rect.Right;
+        set => Bind(eEdge.Right, value);
+    }
+    public int Bottom
+    {
+        get => Rect.Bottom;
+        set => Bind(eEdge.Bottom, value);
+    }
 
     private bool IsDimBound(eEdge edge) => (BoundDims & edge.AsFlag()) > 0;
     private bool IsDimBound(eSize size) => (BoundDims & size.AsFlag()) > 0;
@@ -43,6 +68,7 @@ public class OLayout
 
     public OLayout Bind(eEdge edge, int value)
     {
+        if(IsEdgeBound(edge)) return this;
         var opp = IsDimBound(edge.Opposite());
         var size = IsDimBound(edge.AxisSize());
         Debug.Assert(!opp || !size);
@@ -55,6 +81,7 @@ public class OLayout
     }
     public OLayout Bind(eSize size, int value)
     {
+        if(IsSizeBound(size)) return this;
         var min = IsDimBound(size.AxisEdge(false));
         var max = IsDimBound(size.AxisEdge(true));
         Debug.Assert(!min || !max);
@@ -86,25 +113,35 @@ public class OLayout
         Rect = replacement;
         GLayoutEngine.Dirty = true;
     }
-}
 
-public interface ILayoutTransform : ILayout
-{
+    public void ClearBinds() =>
+        BoundDims = eDimensionFlag.None;
+
+    #region Transform
+    
     // these are both additive so that they can be started at 0
-    public Vector2 RelativeTransformPos { get; set; }
-    public Vector2 RelativeTransformSize { get; set; }
+    public Vector2 RelativeTransformPos = Vector2.Zero;
+    public Vector2 RelativeTransformSize = Vector2.Zero;
     public FRectangle TransformedLayout =>
         new FRectangle(
-            Layout.Rect.GetTopLeft().ToVector2() + RelativeTransformPos,
-            Layout.Rect.Size.ToVector2() + RelativeTransformSize
+            Rect.GetTopLeft().ToVector2() + RelativeTransformPos,
+            Rect.Size.ToVector2() + RelativeTransformSize
         );
     public void TransformScale(Vector2 scaleMod)
     {
-        RelativeTransformSize = Layout.Rect.Size.ToVector2() * scaleMod;
+        RelativeTransformSize = Rect.Size.ToVector2() * scaleMod;
     }
-}
 
-public class OLayoutTransform
-{
-    internal Vector4 Transform = Vector4.Zero;
+    public void SetAbsoluteTransformPos(Vector2 pos)
+    {
+        RelativeTransformPos = pos - Rect.GetTopLeft().ToVector2();
+    }
+
+    public void SetAbsoluteTransform(FRectangle rect)
+    {
+        RelativeTransformPos = rect.TopLeft - Rect.GetTopLeft().ToVector2();
+        RelativeTransformSize = rect.Size - Rect.Size.ToVector2();
+    }
+        
+    #endregion
 }

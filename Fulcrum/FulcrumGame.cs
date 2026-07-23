@@ -10,6 +10,7 @@ public class FulcrumGame : Game
     public static FulcrumGame Current;
     bool _skipEveryOtherFrame;
     internal static int _Frame = 0;
+    internal static Tick FrameStart = new Tick();
     internal static SingleThreadSynchronizationContext _sync;
     public FulcrumGame() : base()
     {

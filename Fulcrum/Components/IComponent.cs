@@ -6,49 +6,34 @@ namespace Fulcrum;
 
 public interface IComponentContainer : IComponent
 {
-    internal List<IComponent> _childComponents { get; set; }
-
-    public void Register(IComponent component)
-    {
-        _childComponents.Add(component);
-        component.ParentContainer = this;
-    }
-    public void Unregister(IComponent component)
-    {
-        component.ParentContainer = null;
-        _childComponents.Remove(component);
-    }
-
-    public IEnumerable<IComponent> Children => _childComponents;
-
-    public void WalkTree(Action<IComponent> action)
-    {
-        foreach (var child in Children.ToArray())
-        {
-            action(child);
-            if (child is IComponentContainer container)
-                container.WalkTree(action);
-        }
-    }
-    public void WalkTree<T>(Action<T> action)
-    {
-        foreach (var child in Children.ToArray())
-        {
-            if (child is T tChild)
-                action(tChild);
-            if (child is IComponentContainer container)
-                container.WalkTree(action);
-        }
-    }
+    public void OnAddChild(IComponent component) { }
+    public void OnRemoveChild(IComponent component) { }
+    public bool PauseChildUpdates() => false;
+    public bool PauseChildDraws() => false;
 }
 
 public interface IComponent
 {
-    public IComponentContainer ParentContainer { get; set; }
+    public ComponentTree Tree { get; set; }
 }
 
 public class BaseComponent : IComponent
 {
-    public IComponentContainer ParentContainer { get; set; }
-    public BaseComponent() { ParentContainer = null; }
+    public ComponentTree Tree { get; set; }
+}
+
+public interface IUpdate : IComponent
+{
+    public void OnUpdate(Tick frameTime);
+}
+
+public interface IDraw : IComponent
+{
+    public void OnRender(Tick frameTime) { }
+    // Before any controls are drawn
+    public void OnPreDraw(Tick frameTime) { }
+    // Draw occurs before children are drawn
+    public void OnDraw(Tick frameTime);
+    // After all normal draws
+    public void OnPostDraw(Tick frameTime) { }
 }

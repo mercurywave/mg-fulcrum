@@ -9,7 +9,8 @@ public class IAnimation
     public event AnimationCompleteHandler evAnimationComplete;
     public event AnimationCompleteHandler evAnimationCleanup; // called whether it completed or not
     public virtual void Initialize(AnimationManager manager) { } // keep your state-based setup here, not constructor (enqueue animation will be funny)
-    public virtual void Advance(AnimationManager manager, Tick delta) { }
+    // note: now may not line up with delta - delta is capped per frame
+    public virtual void Advance(AnimationManager manager, Tick now, Tick delta) { }
     public virtual void Cleanup(AnimationManager manager) { evAnimationCleanup?.Invoke(this); }
 
     public bool Complete

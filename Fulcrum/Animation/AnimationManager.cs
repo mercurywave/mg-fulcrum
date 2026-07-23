@@ -54,7 +54,7 @@ public class AnimationManager
         InitQueued(false);
         foreach (var anim in _animations.ToArray())
             if (!anim.Complete)
-                anim.Advance(this, delta);
+                anim.Advance(this, GCore.FrameStart, delta);
 
         InitQueued(true);
         CleanupQueued();
@@ -74,7 +74,7 @@ public class AnimationManager
             if (catchup)
                 foreach (var anim in toInit)
                     if (!anim.Complete)
-                        anim.Advance(this, Tick.Zero);
+                        anim.Advance(this, GCore.FrameStart, Tick.Zero);
         }
     }
 
@@ -107,4 +107,34 @@ public class AnimationManager
         AddAnimation(timer);
         await t0;
     }
+
+		// return true to indicate the task can complete
+		public async Task AsyncWaitPollCondition(Func<bool> testCondition)
+		{
+			var tcs = new TaskCompletionSource<bool>();
+			Task t0 = tcs.Task;
+			ALoop loop = new ALoop(_ => !testCondition());
+			loop.evAnimationComplete += (anim)
+				=> tcs.SetResult(true);
+			AddAnimation(loop);
+			await t0;
+		}
+
+		// adds the animations and runs them all to completion
+		public async Task AsyncRunWaitForAnimations(params IAnimation[] anims)
+		{
+			if (anims.Length == 0) return;
+			var tcs = new TaskCompletionSource<bool>();
+			Task t0 = tcs.Task;
+			foreach (var a in anims)
+			{
+				AddAnimation(a);
+				a.evAnimationCleanup += _ =>
+				{
+					if (!anims.Any(b => IAnimation.IsActive(b)))
+						tcs.SetResult(true);
+				};
+			}
+			await t0;
+		}
 }

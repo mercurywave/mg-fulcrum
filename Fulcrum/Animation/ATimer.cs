@@ -13,7 +13,7 @@ public class ATimer : IAnimation
         _remaining = tick;
         evAnimationComplete += callback;
     }
-    public override void Advance(AnimationManager manager, Tick delta)
+    public override void Advance(AnimationManager manager, Tick now, Tick delta)
     {
         _remaining -= delta;
         if (_remaining.LessThanZero()) Complete = true;
