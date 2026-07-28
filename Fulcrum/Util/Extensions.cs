@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
@@ -177,4 +178,18 @@ public static class DimensionExtensions
         (eDimension)(int)size;
     public static eDimension AsDim(this eEdge edge) =>
         (eDimension)(int)edge;
+}
+
+public static class ListExtensions
+{
+    public static IEnumerable<U> FilterCast<T, U>(this IEnumerable<T> list) where U : T
+    {
+        var result = new List<U>();
+        foreach (var item in list)
+        {
+            if (item is U uItem)
+                result.Add(uItem);
+        }
+        return result;
+    }
 }

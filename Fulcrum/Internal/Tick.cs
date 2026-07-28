@@ -94,3 +94,21 @@ public readonly struct Tick : IEquatable<Tick>, IComparable<Tick>
     public static Tick TimeImmemorial = new Tick(long.MinValue);
     public static Tick EndOfDays = new Tick(long.MaxValue);
 }
+
+public class FpsCounter
+{
+    int _frameCounter = 0;
+    public int FPS { get; private set; } = 0;
+    Tick _nextSecond = new Tick();
+
+    public void BeginFrame(Tick now)
+    {
+        if(now >= _nextSecond)
+        {
+            FPS = _frameCounter;
+            _frameCounter = 0;
+            _nextSecond = now.OffsetSec(1f);
+        }
+        _frameCounter++;
+    }
+}

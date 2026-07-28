@@ -16,6 +16,11 @@ public class ComponentTree
         _nodes[rootComponent] = _root;
     }
 
+    public void AddChildren(IComponent parent, IEnumerable<IComponent> components)
+    {
+        foreach (var c in components)
+            AddChild(parent, c);
+    }
     public void AddChild(IComponent parent, IComponent child)
     {
         Debug.Assert(parent is IComponentContainer, "Parent must be a component container");
@@ -27,7 +32,7 @@ public class ComponentTree
         parentNode.Children.Add(node);
         _nodes[child] = node;
         ApplySpokes(child);
-        if(parent is IComponentContainer container)
+        if (parent is IComponentContainer container)
             container.OnAddChild(child);
     }
     public void AddTree(IComponent parent, ComponentTree tree)
@@ -46,6 +51,11 @@ public class ComponentTree
         });
 
 
+    public void ClearChildren(IComponent parent)
+    {
+        foreach (var c in GetChildren(parent).ToList())
+            Remove(c);
+    }
     public void Remove(IComponent component)
     {
         if (!_nodes.TryGetValue(component, out var node))
@@ -58,7 +68,7 @@ public class ComponentTree
             node.Parent.Children.Remove(node);
         _nodes.Remove(component);
         RemoveSpokes(component);
-        if(node.Parent?.Component is IComponentContainer container)
+        if (node.Parent?.Component is IComponentContainer container)
             container.OnRemoveChild(component);
     }
     public ComponentTree Slice(IComponent component)
@@ -162,7 +172,7 @@ public class ComponentTree
     }
     public void ApplySpokes(IComponent component)
     {
-        foreach(var (Key, Value) in _spokes)
+        foreach (var (Key, Value) in _spokes)
         {
             if (Key.IsAssignableFrom(component.GetType()))
                 Value.OnAdd?.Invoke(component);
@@ -170,7 +180,7 @@ public class ComponentTree
     }
     public void RemoveSpokes(IComponent component)
     {
-        foreach(var (Key, Value) in _spokes)
+        foreach (var (Key, Value) in _spokes)
         {
             if (Key.IsAssignableFrom(component.GetType()))
                 Value.OnRemove?.Invoke(component);

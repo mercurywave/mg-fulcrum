@@ -8,13 +8,15 @@ namespace Fulcrum;
 public static class GCore
 {
     public static bool Debug = false;
+    public static bool IsLoaded = false;
     internal static bool CanUseDebug = false;
     public static AnimationManager GlobalAnimator = new AnimationManager();
+    internal static OSceneManager SceneManager = new OSceneManager();
     internal static ComponentTree ComponentTree = null;
     public static Tick FrameStart => FulcrumGame.FrameStart;
 
 
-    internal static SingleThreadSynchronizationContext _sync;
+    internal static SingleThreadSynchronizationContext _sync => FulcrumGame._sync;
     public static void Defer(Task t)
     {
         System.Diagnostics.Debug.Assert(SynchronizationContext.Current == _sync);

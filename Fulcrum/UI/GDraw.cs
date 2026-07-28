@@ -6,11 +6,14 @@ namespace Fulcrum;
 
 public static class GDraw
 {
+    public static Color DefaultColor = Color.DarkSlateGray;
+    
     public static SpriteBatch sb = null; // set by screen init
     public static SamplerState DefaultSamplerState = null;
     static RasterizerState _scissorRasterizer = new RasterizerState() { ScissorTestEnable = true };
     internal static Texture2D _pixel = null; // set by screen init
     internal static float _safeLayerSubstep = -.000001f;
+
 
     #region Spritebatch
     public static ODisposable BatchBlock()
@@ -101,7 +104,6 @@ public static class GDraw
 
 
     public static void Clear(Color color) { GScreen.device.Clear(color); }
-    public static void Overlay(Color color) { Clear(color); }
     public static void Clear() { Clear(Color.Black); }
 
 
