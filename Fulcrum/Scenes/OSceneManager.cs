@@ -43,7 +43,7 @@ public class OSceneManager : ILayout, IComponentContainer
                 await _animManager.AsyncRunWaitForAnimations(trans);
             }
 
-            foreach (var s in states)
+            foreach (var s in toClose)
                 Tree.Remove(s);
             return eSceneRunResult.Completed;
         }
@@ -60,6 +60,7 @@ public class OSceneManager : ILayout, IComponentContainer
 
     void prepFreshScene(IScene state)
     {
+        state.SceneData = new OScene(state);
         state.SceneData.BeginLoad();
     }
 }

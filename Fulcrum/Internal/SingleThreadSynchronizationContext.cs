@@ -34,18 +34,18 @@ internal sealed class SingleThreadSynchronizationContext : SynchronizationContex
 	//		workItem.Key(workItem.Value);
 	//}
 
-	public void PumpBackgroundJobs(double milliseconds)
+	public void PumpBackgroundJobs(Tick dur)
 	{
 		GPerf.BeginBlock(GPerf.eMajorTraceType.Sync);
 		KeyValuePair<SendOrPostCallback, object> workItem;
-		var end = GPerf.Now() + GPerf.MsToTicks(milliseconds);
+		var end = Tick.Now() + dur;
 		if (m_queue.Count > 0)
 			while (m_queue.TryTake(out workItem, 0))
 			{
 				GPerf.BeginBlock("Task");
 				workItem.Key(workItem.Value);
 				GPerf.EndBlock();
-				if (GPerf.Now() > end) break;
+				if (Tick.Now() > end) break;
 			}
 		GPerf.EndBlock(GPerf.eMajorTraceType.Sync);
 	}

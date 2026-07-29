@@ -11,8 +11,8 @@ public static class GCore
     public static bool IsLoaded = false;
     internal static bool CanUseDebug = false;
     public static AnimationManager GlobalAnimator = new AnimationManager();
-    internal static OSceneManager SceneManager = new OSceneManager();
-    internal static ComponentTree ComponentTree = null;
+    public static OSceneManager SceneManager = new OSceneManager();
+    public static ComponentTree ComponentTree = null;
     public static Tick FrameStart => FulcrumGame.FrameStart;
 
 

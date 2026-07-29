@@ -8,19 +8,16 @@ public readonly struct Tick : IEquatable<Tick>, IComparable<Tick>
 {
     public readonly long Frame;
 
-    public Tick() { Frame = Now(); }
+    public Tick() { Frame = Stopwatch.GetTimestamp(); }
     // CAUTION - if you aren't careful with types you might mix up units!
     public Tick(long ms) { Frame = MsToTicks(ms); }
     public Tick(float sec) { Frame = MsToTicks(sec * 1000f); }
 
-    public static double DurationMs(long start, long end) => 1000.0 * (end - start) / Stopwatch.Frequency;
-    public static double DurationMs(long length) => 1000.0 * length / Stopwatch.Frequency;
-    public static long MsToTicks(long ms) => ms * Stopwatch.Frequency / 1000;
-    public static long MsToTicks(float ms) => (long)(ms * Stopwatch.Frequency / 1000.0f);
-    public static long MsToTicks(double ms) => (long)(ms * Stopwatch.Frequency / 1000.0);
-    public static long Now() => Stopwatch.GetTimestamp();
+    static long MsToTicks(long ms) => ms * Stopwatch.Frequency / 1000;
+    static long MsToTicks(float ms) => (long)(ms * Stopwatch.Frequency / 1000.0f);
+    static long MsToTicks(double ms) => (long)(ms * Stopwatch.Frequency / 1000.0);
+    public static Tick Now() => new Tick();
 
-    public static long TicksToMs(long ticks) => ticks * 1000 / Stopwatch.Frequency;
 
     // --- Time accessors ---
 
@@ -93,6 +90,13 @@ public readonly struct Tick : IEquatable<Tick>, IComparable<Tick>
     public static Tick Zero = new Tick(0);
     public static Tick TimeImmemorial = new Tick(long.MinValue);
     public static Tick EndOfDays = new Tick(long.MaxValue);
+
+    public static Tick Clamp(Tick value, Tick min, Tick max)
+    {
+        if (value < min) return min;
+        if (value > max) return max;
+        return value;
+    }
 }
 
 public class FpsCounter

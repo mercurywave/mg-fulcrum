@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Fulcrum;
 
+public enum eAutoDisplaySizeMode { None, Small, Large, FullScreen, WindowSize } // PLATFORM: UAP should probably always use WindowSize
 public static class GScreen
 {
 
@@ -19,7 +20,7 @@ public static class GScreen
     public static bool IsWide;
     public static bool IsPortrait;
     static int screenW, screenH;
-    public static GraphicsDevice device;
+    public static GraphicsDevice Device;
     public static GraphicsDeviceManager _graphics;
     public static GameWindow _window;
 
@@ -34,11 +35,10 @@ public static class GScreen
     //true - either use GameEngines DPI implementation with DPI events and DPI aware app
     //false - scale based on resolution relative to 720p is 1x
     public static bool ApplicationSetsScale = true;
-    public enum eAutoDisplaySizeMode { None, Small, Large, FullScreen, WindowSize } // PLATFORM: UAP should probably always use WindowSize
     static eAutoDisplaySizeMode _autoDisplayMode = eAutoDisplaySizeMode.None; // you probably want to set this 
     internal static void Setup(GraphicsDeviceManager graphics, GameWindow window)
     {
-        device = graphics.GraphicsDevice;
+        Device = graphics.GraphicsDevice;
         _graphics = graphics;
         _window = window;
     }
@@ -51,8 +51,8 @@ public static class GScreen
         //screenW = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         //screenH = device.PresentationParameters.BackBufferHeight; // yeah, this isn't actually the screen's size...
         //screenW = device.PresentationParameters.BackBufferWidth;
-        screenH = device.Adapter.CurrentDisplayMode.Height;
-        screenW = device.Adapter.CurrentDisplayMode.Width;
+        screenH = Device.Adapter.CurrentDisplayMode.Height;
+        screenW = Device.Adapter.CurrentDisplayMode.Width;
 
         if (AutoDisplayMode != eAutoDisplaySizeMode.None)
         {
@@ -63,7 +63,9 @@ public static class GScreen
 
         Resize(fullscreen, w, h);
         //ScaleTransform = Matrix.CreateScale(Scale, Scale, 1);
-        GDraw.sb = new SpriteBatch(device);
+        GDraw._pixel = new Texture2D(Device, 1, 1);
+        GDraw._pixel.SetData<Color>([Color.White]);
+        GDraw.sb = new SpriteBatch(Device);
         _initizlized = true;
     }
 
@@ -88,16 +90,16 @@ public static class GScreen
         int w = screenW;
         if (mode == eAutoDisplaySizeMode.WindowSize)
         {
-            h = device.PresentationParameters.BackBufferHeight;
-            w = device.PresentationParameters.BackBufferWidth;
+            h = Device.PresentationParameters.BackBufferHeight;
+            w = Device.PresentationParameters.BackBufferWidth;
         }
         else if (mode != eAutoDisplaySizeMode.None)
         {
             //var monitor = FindMaxAdapterRes();
             //int maxW = monitor.Width;
             //int maxH = monitor.Height;
-            int maxW = device.Adapter.CurrentDisplayMode.Width;
-            int maxH = device.Adapter.CurrentDisplayMode.Height;
+            int maxW = Device.Adapter.CurrentDisplayMode.Width;
+            int maxH = Device.Adapter.CurrentDisplayMode.Height;
             float proportion = .5f;
             if (maxW < 1024 || maxH < 900) proportion = 1;
             else if (mode == eAutoDisplaySizeMode.Large) proportion = .8f;
@@ -124,7 +126,7 @@ public static class GScreen
     static DisplayMode FindMaxAdapterRes()
     {
         DisplayMode big = null;
-        foreach (var disp in device.Adapter.SupportedDisplayModes)
+        foreach (var disp in Device.Adapter.SupportedDisplayModes)
             if (big == null || disp.Width * disp.Height > big.Width * big.Height)
                 big = disp;
         return big;
@@ -132,8 +134,8 @@ public static class GScreen
 
     public static void Resize()
     {
-        int h = device.PresentationParameters.BackBufferHeight;
-        int w = device.PresentationParameters.BackBufferWidth;
+        int h = Device.PresentationParameters.BackBufferHeight;
+        int w = Device.PresentationParameters.BackBufferWidth;
         Resize(true, w, h);
     }
 
@@ -159,14 +161,14 @@ public static class GScreen
 
         _graphics.ApplyChanges();
 
-        screenH = device.PresentationParameters.BackBufferHeight; //since we may have been slightly denied our preference...
-        screenW = device.PresentationParameters.BackBufferWidth;
+        screenH = Device.PresentationParameters.BackBufferHeight; //since we may have been slightly denied our preference...
+        screenW = Device.PresentationParameters.BackBufferWidth;
         setSize(screenW, screenH);
 
         IsPortrait = (screenH > screenW);
 
 
-        GDraw.sb = new SpriteBatch(device);
+        GDraw.sb = new SpriteBatch(Device);
 
         if (!ApplicationSetsScale)
         {
@@ -233,8 +235,8 @@ public static class GScreen
         _graphics.PreferredBackBufferHeight = h;
         _graphics.ApplyChanges();
 
-        screenH = device.PresentationParameters.BackBufferHeight; //since we may have been slightly denied our preference...
-        screenW = device.PresentationParameters.BackBufferWidth;
+        screenH = Device.PresentationParameters.BackBufferHeight; //since we may have been slightly denied our preference...
+        screenW = Device.PresentationParameters.BackBufferWidth;
 
 
         if (!ApplicationSetsScale)

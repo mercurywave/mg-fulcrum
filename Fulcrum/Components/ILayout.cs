@@ -10,10 +10,13 @@ public enum eSize { Width = 16, Height = 32 }
 [Flags]
 internal enum eDimensionFlag { None = 0, Left = 1, Top = 2, Right = 4, Bottom = 8, Width = 16, Height = 32 }
 
+[Spoke]
 public interface ILayout : IComponent
 {
     public OLayout Layout { get; set; }
     public void OnLayout();
+    
+    public static void SpokeOnAdd(ILayout component) { component.Layout = new OLayout(); }
 }
 public interface IViewport : ILayout
 {

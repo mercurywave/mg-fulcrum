@@ -50,6 +50,7 @@ public class FulcrumGame : Game
         GReflection.Scan(this.GetType().GetTypeInfo().Assembly); //getting type here pulls the implmenting assembly
         GCore.SceneManager = new OSceneManager();
         GCore.ComponentTree = new ComponentTree(GCore.SceneManager);
+        Window.ClientSizeChanged += Window_ClientSizeChanged;
         _InitializeScreen(graphics);
         _Initialize();
         _sync.Run(() => RunAsyncMain());
@@ -59,27 +60,23 @@ public class FulcrumGame : Game
     //implement to change standard config and do any other config, if neccessary
     protected virtual void _InitializeScreen(GraphicsDeviceManager graphics)
     {
+        if(GScreen.AutoDisplayMode == eAutoDisplaySizeMode.None) // default to window size if not set
+            GScreen.AutoDisplayMode = eAutoDisplaySizeMode.WindowSize;
         GScreen.Setup(graphics, Window);
-        int width = _InitialWidth();
-        int height = _InitialHeight();
-        bool fullscreen = _InitFullScreen();
         if (GScreen.ApplicationSetsScale)
             GScreen.SetScale(GetScaleForWindow());
-        Window.ClientSizeChanged += Window_ClientSizeChanged;
-        GScreen.Initialize(fullscreen, width, height);
+        GScreen.Initialize(false);
     }
-    protected virtual int _InitialWidth() { return -1; }
-    protected virtual bool _InitFullScreen() { return false; }
-    protected virtual int _InitialHeight() { return -1; }
     protected virtual void _Initialize() { } // generic initialize
 
 
 
     async Task RunAsyncMain()
     {
-        await RunLoadAsync();
         try
         {
+            await RunLoadAsync();
+            GCore.IsLoaded = true;
             await _AsyncMain();
         }
         catch (Exception e) { GError.RaiseError(e); }
@@ -88,11 +85,7 @@ public class FulcrumGame : Game
 
     async Task RunLoadAsync()
     {
-        try
-        {
-            await _LoadAsync();
-        }
-        catch (Exception e) { GError.RaiseError(e); }
+        await _LoadAsync();
     }
     protected virtual async Task _LoadAsync() { await Task.Yield(); }
     // implement for async after the menu content is loaded
@@ -118,11 +111,13 @@ public class FulcrumGame : Game
                 GCore.SceneManager.OnLayout();
                 GCore.ComponentTree.WalkTree<IUpdate>((c) => c.OnUpdate(FrameStart));
             }
+            var dur = Fulcrum.Tick.Now() - FrameStart;
+			_sync.PumpBackgroundJobs(Fulcrum.Tick.Clamp(new Tick(12) - dur, new Tick(1), new Tick(10)));
         });
 
 
-        if (!GCore.IsLoaded || (_skipEveryOtherFrame && _Frame % 2 == 0))
-            SuppressDraw();
+        // if (!GCore.IsLoaded || (_skipEveryOtherFrame && _Frame % 2 == 0))
+        //     SuppressDraw();
         base.Update(gameTime);
         GPerf.EndBlock();
     }

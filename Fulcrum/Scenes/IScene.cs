@@ -5,16 +5,14 @@ namespace Fulcrum;
 
 public enum eSceneRunResult { Completed, Cancelled }
 
-[Spoke]
 public interface IScene : ILayout
 {
     public OScene SceneData { get; set; }
     public async Task DoLoadAsync() { } // called every time 
-    public void DoUnload() { } // called every time 
-    public void OnClose();
     public void RequestClose() => SceneData.CloseRequested = true;
-    public static void SpokeOnAdd(IScene scene) { scene.SceneData = new OScene(scene); }
-    public static void SpokeOnRemove(IScene scene) { }
+    public void OnClose() { }
+    public void DoUnload() { }
+    // This isn't a spoke because the scene manager sets it up before it's added to the tree
 
 }
 

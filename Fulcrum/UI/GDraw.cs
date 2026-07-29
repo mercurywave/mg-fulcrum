@@ -6,12 +6,12 @@ namespace Fulcrum;
 
 public static class GDraw
 {
-    public static Color DefaultColor = Color.DarkSlateGray;
+    public static Color DefaultColor = new Color(9, 9, 9);
     
     public static SpriteBatch sb = null; // set by screen init
     public static SamplerState DefaultSamplerState = null;
     static RasterizerState _scissorRasterizer = new RasterizerState() { ScissorTestEnable = true };
-    internal static Texture2D _pixel = null; // set by screen init
+    public static Texture2D _pixel = null; // set by screen init
     internal static float _safeLayerSubstep = -.000001f;
 
 
@@ -39,7 +39,7 @@ public static class GDraw
 
 
     public static ODisposable RenderTargetBlock(RenderTarget2D tex)
-        => new ODisposable(() => GScreen.device.SetRenderTarget(tex), () => GScreen.device.SetRenderTarget(null));
+        => new ODisposable(() => GScreen.Device.SetRenderTarget(tex), () => GScreen.Device.SetRenderTarget(null));
 
 
     static void Begin()
@@ -103,7 +103,7 @@ public static class GDraw
     #endregion
 
 
-    public static void Clear(Color color) { GScreen.device.Clear(color); }
+    public static void Clear(Color color) { GScreen.Device.Clear(color); }
     public static void Clear() { Clear(Color.Black); }
 
 

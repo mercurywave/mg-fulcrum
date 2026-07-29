@@ -14,6 +14,8 @@ public class ComponentTree
     {
         _root = new TreeNode(null, rootComponent);
         _nodes[rootComponent] = _root;
+        rootComponent.Tree = this;
+        ApplySpokes(rootComponent);
     }
 
     public void AddChildren(IComponent parent, IEnumerable<IComponent> components)
@@ -60,6 +62,7 @@ public class ComponentTree
     {
         if (!_nodes.TryGetValue(component, out var node))
             throw new Exception("Component not found in tree");
+        if (node.Children != null)
         foreach (var child in node.Children.ToList())
             Remove(child.Component);
         UnregisterRecursive(node);
@@ -91,6 +94,7 @@ public class ComponentTree
     {
         if (!_nodes.TryGetValue(component, out var node))
             throw new Exception("Component not found in tree");
+        if (node.Children == null) return Enumerable.Empty<IComponent>();
         return node.Children.Select(n => n.Component);
     }
 
@@ -114,10 +118,9 @@ public class ComponentTree
     private void WalkTreeNode(TreeNode node, Action<IComponent> action)
     {
         action(node.Component);
-        foreach (var child in node.Children.ToList())
-        {
-            WalkTreeNode(child, action);
-        }
+        if (node.Children != null)
+            foreach (var child in node.Children.ToList())
+                WalkTreeNode(child, action);
     }
 
     public void WalkTree<T>(Action<T> action) =>
@@ -133,10 +136,9 @@ public class ComponentTree
     {
         if (node.Component is T tComponent)
             action(tComponent);
-        foreach (var child in node.Children.ToList())
-        {
-            WalkTreeNode<T>(child, action);
-        }
+        if (node.Children != null)
+            foreach (var child in node.Children.ToList())
+                WalkTreeNode<T>(child, action);
     }
 
     public T ScanUpTree<T>(IComponent component) where T : IComponent
@@ -161,8 +163,8 @@ public class ComponentTree
 
         _spokes.Add(spoke, new SpokeInfo
         {
-            OnAdd = i => onAdd?.Invoke(null, [Convert.ChangeType(i, spoke)]),
-            OnRemove = i => onRemove?.Invoke(null, [Convert.ChangeType(i, spoke)])
+            OnAdd = i => onAdd?.Invoke(null, [i]),
+            OnRemove = i => onRemove?.Invoke(null, [i])
         });
     }
     struct SpokeInfo
