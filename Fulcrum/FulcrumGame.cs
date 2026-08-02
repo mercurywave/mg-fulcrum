@@ -86,6 +86,8 @@ public class FulcrumGame : Game
     async Task RunLoadAsync()
     {
         await _LoadAsync();
+        if (GCore.CanUseDebug)
+            GCore.Defer(HotLoader.ScanForChanges());
     }
     protected virtual async Task _LoadAsync() { await Task.Yield(); }
     // implement for async after the menu content is loaded
