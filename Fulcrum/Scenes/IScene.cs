@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,6 +9,8 @@ public enum eSceneRunResult { Completed, Cancelled }
 public interface IScene : ILayout
 {
     public OScene SceneData { get; set; }
+    public OLoad _DynamicContent => null; // specify a content manager that is loaded and unloaded like magic
+    public OLoad _StaticContent => null; // loaded once when needed
     public async Task DoLoadAsync() { } // called every time 
     public void RequestClose() => SceneData.CloseRequested = true;
     public void OnClose() { }
@@ -52,14 +55,11 @@ public class OScene
     {
         _loadStage = eLoadStage.Started;
 
-        // Func<OLoad, Task> helper = async (l) => { if (l != null) await l.AsyncLoad(); };
-        // Func<IAssetBundle, Task> helper2 = async (l) => { if (l != null) await l.AsyncLoad(); };
+        Func<OLoad, Task> helper = async (l) => { if (l != null) await l.AsyncLoad(); };
 
-        // await helper2(_OnLoadStaticData());
-        // await helper(_StaticContent);
+        await helper(Scene._StaticContent);
 
-        // await helper2(_OnLoadDynamicData());
-        // await helper(_DynamicContent);
+        await helper(Scene._DynamicContent);
 
         await Scene.DoLoadAsync();
 
@@ -69,7 +69,7 @@ public class OScene
     {
         _loadStage = eLoadStage.Waiting;
         Scene.DoUnload();
-        //_DynamicContent?.Unload();
+        Scene._DynamicContent?.Unload();
     }
 }
 

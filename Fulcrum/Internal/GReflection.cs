@@ -39,43 +39,45 @@ public static class GReflection
 
         if (autoInit != null)
         {
-            // TODO: for asset loading
-            // // methods are individually flagged for execution
-            // foreach (var meth in t.GetMethods().Where(f => f.IsStatic))
-            // {
-            //     var attr = meth.GetCustomAttribute<AutoInitialize>();
-            //     if (attr != null)
-            //     {
-            //         load.Queue(new ActionAsset(() => meth.Invoke(null, null)), attr);
-            //     }
-            //     if (Core.DebuggerAttached)
-            //     {
-            //         var dact = meth.GetCustomAttribute<DebugAction>();
-            //         if (dact != null)
-            //             DebugMenu.Register(new DebugMenu.Button(dact.Name, () => meth.Invoke(null, null)));
+            // methods are individually flagged for execution
+            foreach (var meth in t.GetMethods().Where(f => f.IsStatic))
+            {
+                var attr = meth.GetCustomAttribute<AutoInitialize>();
+                var useAttr = GetHierarchicalAttribute(autoInit, attr);
+                if (useAttr != null)
+                {
+                    GLoad.Queue(new ActionAsset(() => meth.Invoke(null, null)), useAttr);
+                }
+                if (GCore.CanUseDebug)
+                {
+                    // var dact = meth.GetCustomAttribute<DebugAction>();
+                    // if (dact != null)
+                    //     DebugMenu.Register(new DebugMenu.Button(dact.Name, () => meth.Invoke(null, null)));
 
-            //         var dtog = meth.GetCustomAttribute<DebugToggle>();
-            //         if (dtog != null)
-            //             DebugMenu.Register(new DebugMenu.Toggle(dtog.Name, b => meth.Invoke(null, new object[] { b }), dtog.InitialState));
-            //     }
-            // }
+                    // var dtog = meth.GetCustomAttribute<DebugToggle>();
+                    // if (dtog != null)
+                    //     DebugMenu.Register(new DebugMenu.Toggle(dtog.Name, b => meth.Invoke(null, new object[] { b }), dtog.InitialState));
+                }
+            }
 
-            // // static assets are individually flagged, or use default
-            // foreach (var f in t.GetFields().Where(f => f.IsStatic))
-            // {
-            //     if (typeof(IAsset).IsAssignableFrom(f.FieldType))
-            //     {
-            //         var fAttr = f.GetCustomAttribute<AutoInitialize>();
-            //         var useAttr = GetHierarchicalAttribute(autoInit, fAttr);
+            // static assets are individually flagged, or use default
+            foreach (var f in t.GetFields().Where(f => f.IsStatic))
+            {
+                if (typeof(IAsset).IsAssignableFrom(f.FieldType))
+                {
+                    var fAttr = f.GetCustomAttribute<AutoInitialize>();
+                    var useAttr = GetHierarchicalAttribute(autoInit, fAttr);
 
-            //         if (useAttr != null)
-            //         {
-            //             var ass = f.GetValue(null) as IAsset;
-            //             if (ass != null) // presumably a placeholder to use later?
-            //                 load.Queue(ass, useAttr);
-            //         }
-            //     }
-            // }
+                    if (useAttr != null)
+                    {
+                        var ass = f.GetValue(null) as IAsset;
+                        if(useAttr.Location != eAssetLocation.Unspecified)
+                            ass.Location = useAttr.Location;
+                        if (ass != null) // presumably a placeholder to use later?
+                            GLoad.Queue(ass, useAttr);
+                    }
+                }
+            }
         }
 
 
@@ -89,11 +91,16 @@ public static class GReflection
     //helper - individual asset overwrites base class method
     static AutoInitialize GetHierarchicalAttribute(AutoInitialize autoInit, AutoInitialize itemAttr)
     {
-        if (itemAttr != null) return itemAttr;
-        if (autoInit != null) return autoInit;
-        return null;
+        if (itemAttr == null) return autoInit;
+        if (autoInit == null) return itemAttr;
+        var loadBy = itemAttr.LoadBy > autoInit.LoadBy ? itemAttr.LoadBy : autoInit.LoadBy;
+        var isContent = (itemAttr.Location != eAssetLocation.Unspecified) ? itemAttr.Location : autoInit.Location;
+        var key = string.IsNullOrEmpty(itemAttr.Key) ? autoInit.Key : itemAttr.Key;
+        var priority = Math.Max(itemAttr.Priority, autoInit.Priority);
+        return new AutoInitialize(loadBy, isContent, key, priority);
     }
 }
+
 
 //add to a public static function to run function at stage
 //add to a public static asset to load at stage
@@ -105,14 +112,16 @@ public class AutoInitialize : Attribute
     public eLoadBy LoadBy;
     public string Key = "";
     public int Priority = 1;
+    public eAssetLocation Location = eAssetLocation.Unspecified;
 
-    public AutoInitialize(eLoadBy loadBy = eLoadBy.Menu, string key = "", int priority = 1)
+    public AutoInitialize(eLoadBy loadBy = eLoadBy.Menu, eAssetLocation location = eAssetLocation.Unspecified, string key = "", int priority = 1)
     {
         LoadBy = loadBy;
+        Location = location;
         Key = key;
         Priority = priority;
     }
-    public AutoInitialize(eLoadBy loadBy, int priority) : this(loadBy, "", priority) { }
+    public AutoInitialize(eLoadBy loadBy, eAssetLocation location, int priority) : this(loadBy, location, "", priority) { }
 }
 
 // register a component spoke

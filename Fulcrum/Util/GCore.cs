@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework.Content;
 
 namespace Fulcrum;
 
@@ -14,6 +15,7 @@ public static class GCore
     public static OSceneManager SceneManager = new OSceneManager();
     public static ComponentTree ComponentTree = null;
     public static Tick FrameStart => FulcrumGame.FrameStart;
+    internal static ContentManager Content; // this is set here to avoid a circular loading dependency
 
 
     internal static SingleThreadSynchronizationContext _sync => FulcrumGame._sync;

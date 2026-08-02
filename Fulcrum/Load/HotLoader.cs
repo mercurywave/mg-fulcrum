@@ -29,7 +29,7 @@ class HotLoaderTracker
     {
         var tracker = _hotLoaders.FirstOrDefault(ft => ft.Asset.Path == path);
         if (tracker != null)
-            tracker.Asset.HotLoad();
+            tracker.Asset.HotLoad(Loader);
     }
 
     public async Task ScanForChanges()

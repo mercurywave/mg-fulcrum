@@ -14,46 +14,45 @@ public enum eThrottle { Background, Normal, Prioritized }
 public static class GLoad
 {
     public static eThrottle Throttling = eThrottle.Background;
-    public static string ContentDirectory;
     public static string DataDirectory;
-	public static ContentManager Content;
-		static SortedDictionary<AutoInitialize.eLoadBy, OLoad> _stages = new SortedDictionary<AutoInitialize.eLoadBy, OLoad>() {
-			{ AutoInitialize.eLoadBy.Game, new OLoad() },
-			{ AutoInitialize.eLoadBy.Menu, new OLoad() },
-			{ AutoInitialize.eLoadBy.Launch, new OLoad() }
-		};
-        static SortedDictionary<string, OLoad> _staticKeys = new SortedDictionary<string, OLoad>();
+    public static string ContentDirectory => GCore.Content.RootDirectory;
+    static SortedDictionary<AutoInitialize.eLoadBy, OLoad> _stages = new SortedDictionary<AutoInitialize.eLoadBy, OLoad>() {
+            { AutoInitialize.eLoadBy.Game, new OLoad() },
+            { AutoInitialize.eLoadBy.Menu, new OLoad() },
+            { AutoInitialize.eLoadBy.Launch, new OLoad() }
+        };
+    static SortedDictionary<string, OLoad> _staticKeys = new SortedDictionary<string, OLoad>();
 
-		public static OLoad Launch => _stages[AutoInitialize.eLoadBy.Launch];
-		public static OLoad Menu => _stages[AutoInitialize.eLoadBy.Menu];
-		public static OLoad Game => _stages[AutoInitialize.eLoadBy.Game];
+    public static OLoad Launch => _stages[AutoInitialize.eLoadBy.Launch];
+    public static OLoad Menu => _stages[AutoInitialize.eLoadBy.Menu];
+    public static OLoad Game => _stages[AutoInitialize.eLoadBy.Game];
 
-		internal static SortedDictionary<string, OLoad> Keyed => _staticKeys; // should probably be carful about access of these things
-		static SortedDictionary<AutoInitialize.eLoadBy, OLoad> Staged => _stages;
-        public static void Queue(IAsset asset, AutoInitialize attr)
-		{
-			if (attr.LoadBy == AutoInitialize.eLoadBy.Key)
-				Queue(asset, attr.Key, attr.Priority);
-			else
-				Queue(asset, attr.LoadBy, attr.Priority);
-		}
-		public static void Queue(IAsset asset, AutoInitialize.eLoadBy step, int priority = 1)
-		{
-			_stages[step].Queue(asset, priority);
-		}
-		public static void Queue(IAsset asset, string key, int priority = 1)
-		{
-			if (!_staticKeys.ContainsKey(key))
-				_staticKeys.Add(key, new OLoad());
-			_staticKeys[key].Queue(asset, priority);
-		}
+    internal static SortedDictionary<string, OLoad> Keyed => _staticKeys; // should probably be carful about access of these things
+    static SortedDictionary<AutoInitialize.eLoadBy, OLoad> Staged => _stages;
+    public static void Queue(IAsset asset, AutoInitialize attr)
+    {
+        if (attr.LoadBy == AutoInitialize.eLoadBy.Key)
+            Queue(asset, attr.Key, attr.Priority);
+        else
+            Queue(asset, attr.LoadBy, attr.Priority);
+    }
+    public static void Queue(IAsset asset, AutoInitialize.eLoadBy step, int priority = 1)
+    {
+        Staged[step].Queue(asset, priority);
+    }
+    public static void Queue(IAsset asset, string key, int priority = 1)
+    {
+        if (!_staticKeys.ContainsKey(key))
+            _staticKeys.Add(key, new OLoad());
+        _staticKeys[key].Queue(asset, priority);
+    }
 
-		public static OLoad GetKeyedLoad(string key) => Keyed[key];
+    public static OLoad GetKeyedLoad(string key) => Keyed[key];
 }
 
 public class OLoad
 {
-    public ContentManager con = new ContentManager(GLoad.Content.ServiceProvider, GLoad.Content.RootDirectory);
+    public ContentManager con = new ContentManager(GCore.Content.ServiceProvider, GCore.Content.RootDirectory);
 
     // syntax for priority queue isn't ideal, but this maintains the order code is written, which a sorted list can't
     OPriorityQueue<int, IAsset> _kickoff = new OPriorityQueue<int, IAsset>();
@@ -204,7 +203,7 @@ public class OLoad
             }
             GPerf.LogAsync(logger, "all done");
         }
-        if(GCore.CanUseDebug)
+        if (GCore.CanUseDebug)
             HotLoader.Register(this);
         _state = eLoaderState.Complete;
     }
@@ -258,107 +257,4 @@ public class OLoad
         con.Unload();
         _state = eLoaderState.Waiting; // you probably don't want to unload and then load again
     }
-}
-public enum eLoadState { Waiting, Started, Complete, Failed, Unloaded }
-
-public class IAsset
-{
-    public IAsset() { }
-    public IAsset(string path)
-    {
-        _path = path;
-    }
-    public delegate void AssetAfterLoadHandler(IAsset asset);
-    public event AssetAfterLoadHandler evAssetLoaded;
-    public eLoadState Load(OLoad load)
-    {
-        try
-        {
-            var result = _Load(load);
-            if (result == eLoadState.Complete) CompleteLoad();
-            return result;
-        }
-        catch (Exception e) { GError.RaiseError(new Exception("File loading error: " + ToString(), e)); }
-        return eLoadState.Failed;
-    }
-    public virtual eLoadState _Load(OLoad load) { return eLoadState.Complete; } //override this to load the asset
-    internal eLoadState BeginLoad(OLoad load)
-    {
-        LoadState = eLoadState.Started;
-        var result = _Load(load);
-        if (result == eLoadState.Complete) CompleteLoad();
-        return result;
-    }
-    public virtual bool _Unload(OLoad load) { return true; }
-    internal void Unload(OLoad load)
-    {
-        // most likely, if this isn't complete, it was cleared because a parent unloaded it
-        if (LoadState != eLoadState.Complete) return;
-        LoadState = eLoadState.Unloaded;
-        // NOTE: there are a bunch of assets that don't try to really unload
-        // Some assets just don't make a lot of sense
-        _Unload(load);
-    }
-    //called when an asset is fully loaded
-    protected void CompleteLoad()
-    {
-        if (LoadState == eLoadState.Complete) return;
-        LoadState = eLoadState.Complete;
-        if (!SafeForParallel) RunFollowUps();
-    }
-    public eLoadState LoadState = eLoadState.Waiting;
-    public bool IsLoaded => LoadState == eLoadState.Complete;
-    public bool WaitingForLoad => LoadState == eLoadState.Waiting;
-    public bool InContentDirectory;
-    // relative to the content/data root
-    string _path; 
-    public override string ToString()
-    {
-        return GetType().Name + " " + _path;
-    }
-    public string Path { get { return _path; } }
-
-    public string AbsolutePath
-    {
-        get
-        {
-            if (InContentDirectory)
-                return GLoad.Content.RootDirectory + "\\" + _path;
-            else
-                return GLoad.DataDirectory + "\\" + _path;
-        }
-    }
-
-    public string Extension
-    {
-        get
-        {
-            var ext = System.IO.Path.GetExtension(_path);
-            if (ext.Length > 0) return ext.Substring(1);
-            return "";
-        }
-    }
-    public string PathWithoutExtension
-    {
-        get
-        {
-            var ext = System.IO.Path.GetExtension(_path);
-            if (ext.Length > 0) return _path.Substring(0, _path.Length - ext.Length);
-            return _path;
-        }
-    }
-
-    public void DoRunNowOrWhenLoaded(Action hook)
-    {
-        if (LoadState == eLoadState.Complete) hook();
-        else evAssetLoaded += a => hook();
-    }
-    public virtual bool SafeForParallel => false; // opting in can't support deferred loading
-    internal void RunFollowUps()
-    {
-        evAssetLoaded?.Invoke(this);
-        evAssetLoaded = null;
-    }
-    public virtual bool CanHotLoad => false;
-    public virtual void HotLoad() {  }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Fulcrum;
 
@@ -191,5 +192,43 @@ public static class ListExtensions
                 result.Add(uItem);
         }
         return result;
+    }
+}
+
+public static class DrawExtensions
+{
+    public static void Blit(this Texture2D tex, int x, int y) 
+        => GDraw.Blit(tex, new Vector2(x, y), Color.White);
+    public static void Blit(this Texture2D tex, int x, int y, Color multiply) 
+        => GDraw.Blit(tex, new Vector2(x, y), multiply);
+    public static void Blit(this Texture2D tex, Point topLeft)
+        => GDraw.Blit(tex, topLeft.ToVector2(), Color.White);
+    public static void Blit(this Texture2D tex, Point topLeft, Color multiply)
+        => GDraw.Blit(tex, topLeft.ToVector2(), multiply);
+
+    public static void BlitStretched(this Texture2D tex, Rectangle target, Color multiply)
+        => GDraw.Stretched(tex, target, multiply);
+    public static void BlitStretched(this Texture2D tex, Vector2 topLeft, Vector2 size, Color multiply)
+        => GDraw.Stretched(tex, topLeft, size, multiply);
+
+        
+    public static IEnumerable<KeyValuePair<Point, Color>> IterPixels(this Texture2D tex)
+    {
+        Color[] arr = new Color[tex.Width * tex.Height];
+        tex.GetData(arr);
+        for (int x = 0; x < tex.Width; x++)
+            for (int y = 0; y < tex.Height; y++)
+                yield return new KeyValuePair<Point, Color>(new Point(x, y), arr[x + y * tex.Width]);
+    }
+
+    public static Color[,] GetTextureColorMatrix(this Texture2D tex)
+    {
+        Color[,] output = new Color[tex.Width, tex.Height];
+        Color[] arr = new Color[tex.Width * tex.Height];
+        tex.GetData(arr);
+        for (int x = 0; x < tex.Width; x++)
+            for (int y = 0; y < tex.Height; y++)
+                output[x, y] = arr[x + y * tex.Width];
+        return output;
     }
 }

@@ -26,6 +26,8 @@ public class FulcrumGame : Game
         GCore.Debug = GCore.CanUseDebug && System.Diagnostics.Debugger.IsAttached;
 
         Content.RootDirectory = "Content";
+        GCore.Content = Content;
+
         Current = this;
         HalfDrawRate = GCore.Debug;
         GPerf.Enabled = GCore.Debug;
@@ -85,6 +87,7 @@ public class FulcrumGame : Game
 
     async Task RunLoadAsync()
     {
+        await GLoad.Launch.AsyncLoad(eThrottle.Prioritized);
         await _LoadAsync();
         if (GCore.CanUseDebug)
             GCore.Defer(HotLoader.ScanForChanges());
