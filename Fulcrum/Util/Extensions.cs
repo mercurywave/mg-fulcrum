@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -197,9 +198,9 @@ public static class ListExtensions
 
 public static class DrawExtensions
 {
-    public static void Blit(this Texture2D tex, int x, int y) 
+    public static void Blit(this Texture2D tex, int x, int y)
         => GDraw.Blit(tex, new Vector2(x, y), Color.White);
-    public static void Blit(this Texture2D tex, int x, int y, Color multiply) 
+    public static void Blit(this Texture2D tex, int x, int y, Color multiply)
         => GDraw.Blit(tex, new Vector2(x, y), multiply);
     public static void Blit(this Texture2D tex, Point topLeft)
         => GDraw.Blit(tex, topLeft.ToVector2(), Color.White);
@@ -211,7 +212,7 @@ public static class DrawExtensions
     public static void BlitStretched(this Texture2D tex, Vector2 topLeft, Vector2 size, Color multiply)
         => GDraw.Stretched(tex, topLeft, size, multiply);
 
-        
+
     public static IEnumerable<KeyValuePair<Point, Color>> IterPixels(this Texture2D tex)
     {
         Color[] arr = new Color[tex.Width * tex.Height];
@@ -230,5 +231,80 @@ public static class DrawExtensions
             for (int y = 0; y < tex.Height; y++)
                 output[x, y] = arr[x + y * tex.Width];
         return output;
+    }
+}
+
+public static class FontExtensions
+{
+
+    public static string WrapText(this SpriteFont spriteFont, string text, long maxLineWidth)
+    {
+        string[] lines = text.Split('\n');
+        StringBuilder sb = new StringBuilder();
+        float spaceWidth = spriteFont.MeasureString(" ").X;
+        foreach (string line in lines)
+        {
+            if (sb.Length > 0)
+                sb.Append('\n');
+            string[] words = line.Split(' ');
+            float lineWidth = 0f;
+
+            foreach (string word in words)
+            {
+                Vector2 size = spriteFont.MeasureString(word);
+
+                if (lineWidth + size.X < maxLineWidth)
+                {
+                    sb.Append(word + " ");
+                    lineWidth += size.X + spaceWidth;
+                }
+                else
+                {
+                    if (lineWidth > 0) //don't insert new line if it's already a new line (word is wider than available space)
+                        sb.Append("\n");
+                    if (size.X > maxLineWidth)
+                    {
+                        // this is a naive attempt to wrap better if the space is very narrow
+                        // assumes you aren't trying to fit a word in half the space
+                        // game display code probably shouldn't fall into this path
+                        SplitWrapSingleWord(spriteFont, word, maxLineWidth, out var a, out var b);
+                        sb.Append(a + (b.Length > 0 ? "\n" + b : "") + " ");
+                        if (b.Length > 0)
+                            size = spriteFont.MeasureString(b);
+                    }
+                    else
+                        sb.Append(word + " ");
+                    lineWidth = size.X + spaceWidth;
+                }
+            }
+        }
+
+        return sb.ToString().TrimEnd(' ');
+    }
+
+    static void SplitWrapSingleWord(this SpriteFont spriteFont, string word, long maxLineWidth, out string a, out string b)
+    {
+        if (maxLineWidth <= 0 || word.Length < 4) { a = word; b = ""; return; }
+        // CamelCaseLike
+        //if (word.Skip(1).Any(c => char.IsUpper(c)) && word.Skip(1).Any(c => char.IsLower(c)))
+        // maybe layer
+        for (int i = word.Length - 2; i > 1; i--)
+        {
+            if ("aeiou()-_".Contains(char.ToLower(word[i])))
+            {
+                a = word.Substring(0, i) + "-";
+                b = word.Substring(i);
+                if (spriteFont.MeasureString(a).X < maxLineWidth) return;
+            }
+        }
+        for (int i = word.Length - 3; i > 1; i--)
+        {
+            a = word.Substring(0, i) + "-";
+            b = word.Substring(i + 1);
+            if (spriteFont.MeasureString(a).X < maxLineWidth) return;
+        }
+        a = word;
+        b = "";
+        return; // shouldn't happen
     }
 }

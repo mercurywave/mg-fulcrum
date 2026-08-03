@@ -97,6 +97,14 @@ public class OLoad
         await tcs.Task;
     }
 
+    public async Task AsyncLoadAssets(IEnumerable<IAsset> assets)
+    {
+        List<Task> tasks = new List<Task>();
+        foreach (var ass in assets)
+            tasks.Add(AsyncLoadAsset(ass));
+        await Task.WhenAll(tasks);
+    }
+
     public void Preload()
     {
         GCore.Defer(AsyncLoad(eThrottle.Background));
