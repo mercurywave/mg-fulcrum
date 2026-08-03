@@ -7,24 +7,43 @@ namespace Fulcrum;
 
 public class SpriteSheet : IAsset
 {
-    // represents a horizontal strip of sprites (I guess I could support the strip wrapping...?)
-    internal ImageAsset Texture;
+    // represents a horizontal strip of sprites
+    internal Texture2D Texture;
+    internal ImageAsset _asset = null;
     int _frameWidth;
     int _frameHeight;
     public int Frames => CalcFrames(); // requires texture to be loaded
     public int PixelPad = 0; // assumes not buffer to the left Use to avoid slight float errors in sampling
 
+    // meant for use with dynamic sheets
+    public SpriteSheet(Texture2D texture, int frameWidth, int frameHeight)
+    {
+        _frameHeight = frameHeight;
+        _frameWidth = frameWidth;
+        Texture = texture;
+    }
+    public SpriteSheet(ImageAsset asset, int frameWidth, int frameHeight) : base(asset.Path)
+    {
+        _frameHeight = frameHeight;
+        _frameWidth = frameWidth;
+        _asset = asset;
+    }
+
     public SpriteSheet(string path, int frameWidth, int frameHeight) : base(path)
     {
         _frameHeight = frameHeight;
         _frameWidth = frameWidth;
-        Texture = new ImageAsset(path);
+        _asset = new ImageAsset(path);
     }
     public override eLoadState _Load(OLoad load)
     {
-        if(Texture.LoadState == eLoadState.Complete)
+        if (_asset == null || _asset.LoadState == eLoadState.Complete)
             return eLoadState.Complete;
-        load.AsyncLoadAsset(Texture).ContinueWith(_ => CompleteLoad());
+        load.AsyncLoadAsset(_asset).ContinueWith(_ =>
+        {
+            Texture = _asset;
+            CompleteLoad();
+        });
         return eLoadState.Waiting;
     }
 
@@ -132,6 +151,7 @@ public class SpriteSheet : IAsset
 
     public override void _Unload(OLoad load)
     {
-        load.Unload(Texture);
+        if (_asset != null)
+            load.Unload(_asset);
     }
 }
