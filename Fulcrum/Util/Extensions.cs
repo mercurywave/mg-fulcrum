@@ -97,7 +97,36 @@ public static class RectangleExtensions
         => new Point(rect.X + rect.Width, rect.Y + rect.Height);
 }
 
-
+public static class PointExtensions
+{
+    public static int ManhattanDistanceTo(this Point a, Point b)
+        => ManhattanDistance(a, b);
+    public static int ManhattanDistance(Point a, Point b)
+    {
+        return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+    }
+    //eight directional movement
+    public static int AngularDistanceTo(this Point a, Point b)
+        => AngularDistance(a, b);
+    public static int AngularDistance(Point a, Point b)
+    {
+        return Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Y - b.Y));
+    }
+    // as the crow flies
+    public static float BirdDistanceTo(this Point a, Point b)
+        => BirdDistance(a, b);
+    public static float BirdDistance(Point a, Point b)
+    {
+        return (float)Math.Sqrt(Math.Pow(Math.Abs(a.X - b.X), 2) + Math.Pow(Math.Abs(a.Y - b.Y), 2));
+    }
+    // save a sqrt
+    public static float BirdDistanceSquaredTo(this Point a, Point b)
+        => BirdDistanceSquared(a, b);
+    public static float BirdDistanceSquared(Point a, Point b)
+    {
+        return (float)(Math.Pow(Math.Abs(a.X - b.X), 2) + Math.Pow(Math.Abs(a.Y - b.Y), 2));
+    }
+}
 
 public static class DimensionExtensions
 {

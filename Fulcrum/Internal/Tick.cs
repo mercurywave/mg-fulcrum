@@ -6,7 +6,7 @@ namespace Fulcrum;
 // A Tick can represent both an instant in time, as well as a duration
 public readonly struct Tick : IEquatable<Tick>, IComparable<Tick>
 {
-    public readonly long Frame;
+    public long Frame { get; init; }
 
     public Tick() { Frame = Stopwatch.GetTimestamp(); }
     // CAUTION - if you aren't careful with types you might mix up units!
@@ -88,8 +88,8 @@ public readonly struct Tick : IEquatable<Tick>, IComparable<Tick>
     public override string ToString() => $"Tick({Frame})";
 
     public static Tick Zero = new Tick(0);
-    public static Tick TimeImmemorial = new Tick(long.MinValue);
-    public static Tick EndOfDays = new Tick(long.MaxValue);
+    public static Tick TimeImmemorial = new Tick() { Frame = long.MinValue };
+    public static Tick EndOfDays = new Tick() { Frame = long.MaxValue };
 
     public static Tick Clamp(Tick value, Tick min, Tick max)
     {

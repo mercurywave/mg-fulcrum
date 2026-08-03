@@ -112,6 +112,8 @@ public class FulcrumGame : Game
         {
             if (GCore.IsLoaded)
             {
+				GMouse.Update();
+                
                 _Update();
                 GCore.SceneManager.OnLayout();
                 GCore.ComponentTree.WalkTree<IUpdate>((c) => c.OnUpdate(FrameStart));
