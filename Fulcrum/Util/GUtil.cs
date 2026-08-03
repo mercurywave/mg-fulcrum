@@ -169,5 +169,17 @@ public static class GUtil
         }
         return start;
     }
+
+    public static string Join(IEnumerable<string> pieces, string delim)
+    {
+        return string.Join(delim, pieces);
+    }
+    public static string[] Split(string str, string delim)
+    {
+        // by default, split returns a single "" element, which is never what I want
+        if (str == "") return [];
+        string[] arr = [ delim ];
+        return str.Split(arr, StringSplitOptions.None);
+    }
     #endregion
 }

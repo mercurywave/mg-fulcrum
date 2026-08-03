@@ -71,7 +71,7 @@ public static class GReflection
                     if (useAttr != null)
                     {
                         var ass = f.GetValue(null) as IAsset;
-                        if(useAttr.Location != eAssetLocation.Unspecified)
+                        if(ass.Location == eAssetLocation.Unspecified)
                             ass.Location = useAttr.Location;
                         if (ass != null) // presumably a placeholder to use later?
                             GLoad.Queue(ass, useAttr);

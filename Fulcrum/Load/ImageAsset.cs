@@ -39,14 +39,13 @@ public class ImageAsset : IAsset
         }
         return eLoadState.Complete;
     }
-    public override bool _Unload(OLoad load)
+    public override void _Unload(OLoad load)
     {
         if(Location == eAssetLocation.Content)
             load.con.UnloadAsset(PathWithoutExtension);
         else
             _tex.Dispose();
         _tex = null;
-        return base._Unload(load);
     }
 
     public override bool CanHotLoad => Location != eAssetLocation.Content;

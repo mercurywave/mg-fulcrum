@@ -36,7 +36,7 @@ public class IAsset
         if (result == eLoadState.Complete) CompleteLoad();
         return result;
     }
-    public virtual bool _Unload(OLoad load) { return true; }
+    public virtual void _Unload(OLoad load) { }
     internal void Unload(OLoad load)
     {
         // most likely, if this isn't complete, it was cleared because a parent unloaded it
@@ -56,7 +56,7 @@ public class IAsset
     public eLoadState LoadState = eLoadState.Waiting;
     public bool IsLoaded => LoadState == eLoadState.Complete;
     public bool WaitingForLoad => LoadState == eLoadState.Waiting;
-    public eAssetLocation Location = eAssetLocation.Data;
+    public eAssetLocation Location = eAssetLocation.Unspecified; // Hierarchy is this > asset attribute > class attribute > data directory
     // relative to the location root
     string _path;
     public override string ToString()
@@ -123,10 +123,9 @@ public class ActionAsset : IAsset
         _act.Invoke();
         return base._Load(load);
     }
-    public override bool _Unload(OLoad load)
+    public override void _Unload(OLoad load)
     {
         _cleanup?.Invoke();
-        return base._Unload(load);
     }
 }
 
