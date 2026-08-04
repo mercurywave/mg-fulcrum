@@ -178,8 +178,13 @@ public static class GUtil
     {
         // by default, split returns a single "" element, which is never what I want
         if (str == "") return [];
-        string[] arr = [ delim ];
+        string[] arr = [delim];
         return str.Split(arr, StringSplitOptions.None);
     }
     #endregion
+
+    public static IEnumerable<T> EnumOptions<T>()
+    {
+        return Enum.GetValues(typeof(T)).Cast<T>();
+    }
 }

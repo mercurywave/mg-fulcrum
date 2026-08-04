@@ -114,6 +114,7 @@ public class FulcrumGame : Game
             {
 				GMouse.Update();
                 GKeyboard.Update();
+                GGamePad.Update();
                 
                 _Update();
                 GCore.SceneManager.OnLayout();
