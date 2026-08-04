@@ -160,6 +160,7 @@ public class FulcrumGame : Game
 
                 GPerf.BeginBlock(GPerf.eMajorTraceType.Render);
                 GCore.ComponentTree.WalkTree<IDraw>((c) => c.OnRender(FrameStart));
+                GRenderQueue.RunRenders();
                 GPerf.EndBlock();
 
                 GPerf.BeginBlock(GPerf.eMajorTraceType.Draw);
