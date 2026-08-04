@@ -62,7 +62,7 @@ public class FulcrumGame : Game
     //implement to change standard config and do any other config, if neccessary
     protected virtual void _InitializeScreen(GraphicsDeviceManager graphics)
     {
-        if(GScreen.AutoDisplayMode == eAutoDisplaySizeMode.None) // default to window size if not set
+        if (GScreen.AutoDisplayMode == eAutoDisplaySizeMode.None) // default to window size if not set
             GScreen.AutoDisplayMode = eAutoDisplaySizeMode.WindowSize;
         GScreen.Setup(graphics, Window);
         if (GScreen.ApplicationSetsScale)
@@ -112,16 +112,17 @@ public class FulcrumGame : Game
         {
             if (GCore.IsLoaded)
             {
-				GMouse.Update();
+                GMouse.Update();
                 GKeyboard.Update();
                 GGamePad.Update();
-                
+                GTouch.Update();
+
                 _Update();
                 GCore.SceneManager.OnLayout();
                 GCore.ComponentTree.WalkTree<IUpdate>((c) => c.OnUpdate(FrameStart));
             }
             var dur = Fulcrum.Tick.Now() - FrameStart;
-			_sync.PumpBackgroundJobs(Fulcrum.Tick.Clamp(new Tick(12) - dur, new Tick(1), new Tick(10)));
+            _sync.PumpBackgroundJobs(Fulcrum.Tick.Clamp(new Tick(12) - dur, new Tick(1), new Tick(10)));
         });
 
 

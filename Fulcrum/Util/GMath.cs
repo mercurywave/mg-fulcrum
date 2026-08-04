@@ -186,4 +186,32 @@ public static class GMath
     {
         return baseH * W / baseW;
     }
+
+
+
+    public static float Slide(float begin, float end, int step, int maxSteps)
+    {
+        if (step < 0) return begin;
+        if (step > maxSteps) return end;
+        return begin + (end - begin) * step / maxSteps;
+    }
+    public static float Slide(float begin, float end, float time, float duration)
+    {
+        if (time < 0) return end;
+        if (time > duration) return end;
+        return begin + (end - begin) * time / duration;
+    }
+
+    public static int Slide(int begin, int end, int step, int maxSteps)
+    {
+        if (step <= 0) return begin;
+        if (step >= maxSteps) return end;
+        return begin + (end - begin) * step / maxSteps;
+    }
+
+    public static Vector2 Slide(Vector2 begin, Vector2 end, int step, int maxSteps)
+    {
+        if (step >= maxSteps) return end;
+        return new Vector2(Slide(begin.X, end.X, step, maxSteps), Slide(begin.Y, end.Y, step, maxSteps));
+    }
 }
