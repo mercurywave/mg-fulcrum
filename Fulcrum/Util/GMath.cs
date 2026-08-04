@@ -214,4 +214,31 @@ public static class GMath
         if (step >= maxSteps) return end;
         return new Vector2(Slide(begin.X, end.X, step, maxSteps), Slide(begin.Y, end.Y, step, maxSteps));
     }
+
+
+    //ratio is 0-1
+    public static float Lerp(float start, float end, float ratio) => (end - start) * ratio + start;
+    public static int iLerp(int start, int end, float ratio) => (int)(1f * (end - start) * ratio + start);
+
+    // given a value that falls on a line between min and max, what is the lerp ratio?
+    public static float iInvLerp(int min, int max, int value)
+    {
+        if (min - max == 0) return 0;
+        return (value - min) / (max - min);
+    }
+    public static float InvLerp(float min, float max, float value)
+    {
+        if (min - max == 0) return 0;
+        return (value - min) / (max - min);
+    }
+
+    public static Vector2 BezierCurve(Vector2 start, Vector2 end, Vector2 target, float t)
+        => BezierCurve(start, end, target, target, t);
+    public static Vector2 BezierCurve(Vector2 start, Vector2 end, Vector2 target1, Vector2 target2, float t)
+    {
+        // t is 0-1, for position along curve
+        var a = start + (target1 - start) * t;
+        var b = target2 + (end - target2) * t;
+        return a + (b - a) * t;
+    }
 }
