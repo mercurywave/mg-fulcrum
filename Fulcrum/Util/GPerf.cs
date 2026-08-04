@@ -220,7 +220,7 @@ internal struct TraceEvent
     public TraceEvent(int frame, string key, GPerf.eMajorTraceType majorType, GPerf.eEventPhase phase, int jobId = 0)
     {
         Frame = frame;
-        TimeStamp = new Tick();
+        TimeStamp = Tick.Now();
         Key = key;
         Phase = phase;
         MajorType = majorType;

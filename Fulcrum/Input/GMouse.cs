@@ -15,8 +15,8 @@ public static class GMouse
     public static bool CursorHidden = false; // if you tap, the mouse will be hidden
     public static bool Disabled = false; // managed by game - disables mouse-based interactions in ifaces, position and clicks are still updated
 
-    static Tick CLICK_SCAN_MAX = new Tick(333); // x frames after click scan starts, trigger click
-    static Tick HOLD_TIME = CLICK_SCAN_MAX - new Tick(83); // x frames after click scan starts, trigger hold
+    static Tick CLICK_SCAN_MAX = Tick.Ms(333); // x frames after click scan starts, trigger click
+    static Tick HOLD_TIME = CLICK_SCAN_MAX - Tick.Ms(83); // x frames after click scan starts, trigger hold
     static LatchTimer _holdTimer = new LatchTimer();
     static LatchTimer _rHoldTimer = new LatchTimer();
     static LatchTimer _idleTimer = new LatchTimer();

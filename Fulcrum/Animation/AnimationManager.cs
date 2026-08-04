@@ -10,7 +10,7 @@ public class AnimationManager
 {
     internal List<IAnimation> _animations = new List<IAnimation>();
     internal List<IAnimation> _toInitialize = new List<IAnimation>();
-    public static Tick DEFAULT_CAP = new Tick(16);
+    public static Tick DEFAULT_CAP = Tick.Ms(16);
     public Tick Cap = DEFAULT_CAP;
     public static float GlobalSlowDown = 1f;
     public float SlowDown = 1f;
@@ -93,7 +93,7 @@ public class AnimationManager
         => Postpone(0, callback);
     public void Postpone(float seconds, Action callback)
     {
-        var timer = new ATimer(new Tick(seconds), _ => callback());
+        var timer = new ATimer(Tick.Secs(seconds), _ => callback());
         AddAnimation(timer);
     }
 

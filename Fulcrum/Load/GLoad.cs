@@ -172,7 +172,7 @@ public class OLoad
                             //else followUp.Add(i); // would require special handling to resolve safely
                         }
 
-                        var end = new Tick().OffsetMs(2);
+                        var end = Tick.Now().OffsetMs(2);
                         foreach (var i in inOrder)
                         {
                             GPerf.LogAsync(logger, "load " + i.ToString());

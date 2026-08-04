@@ -90,6 +90,8 @@ public readonly struct Tick : IEquatable<Tick>, IComparable<Tick>
     public static Tick Zero = new Tick(0);
     public static Tick TimeImmemorial = new Tick() { Frame = long.MinValue };
     public static Tick EndOfDays = new Tick() { Frame = long.MaxValue };
+    public static Tick Ms(long ms) => new Tick(ms);
+    public static Tick Secs(float sec) => new Tick(sec);
 
     public static Tick Clamp(Tick value, Tick min, Tick max)
     {
