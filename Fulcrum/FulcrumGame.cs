@@ -113,6 +113,7 @@ public class FulcrumGame : Game
             if (GCore.IsLoaded)
             {
 				GMouse.Update();
+                GKeyboard.Update();
                 
                 _Update();
                 GCore.SceneManager.OnLayout();
