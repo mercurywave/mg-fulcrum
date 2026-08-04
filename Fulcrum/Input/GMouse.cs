@@ -69,8 +69,6 @@ public static class GMouse
 
             _holdTimer.Update(IsDown());
             _rHoldTimer.Update(IsRDown());
-            if (IsDown())
-                Console.WriteLine($"Mouse: {_holdTimer.TimeEngaged().Frame} frames held");
             _held = IsDown() && _holdTimer.IsEngagedFor(HOLD_TIME);
             _rHeld = IsRDown() && _rHoldTimer.IsEngagedFor(HOLD_TIME);
         }

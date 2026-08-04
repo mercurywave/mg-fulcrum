@@ -10,17 +10,14 @@ public static class GGamePad
 {
     public delegate void NewPlayerJoinedHandler(OGamePad pad);
 
-    static OGamePad[] _pads;
-    static ePadButton _newPlayer = ePadButton.Start;
-
-    public static void Initialize()
+    static OGamePad[] _pads =
     {
-        _pads = new OGamePad[4];
-        _pads[0] = new OGamePad(PlayerIndex.One);
-        _pads[1] = new OGamePad(PlayerIndex.Two);
-        _pads[2] = new OGamePad(PlayerIndex.Three);
-        _pads[3] = new OGamePad(PlayerIndex.Four);
-    }
+        new OGamePad(PlayerIndex.One),
+        new OGamePad(PlayerIndex.Two),
+        new OGamePad(PlayerIndex.Three),
+        new OGamePad(PlayerIndex.Four)
+    };
+    static ePadButton _newPlayer = ePadButton.Start;
 
     public static void Update()
     {
@@ -93,18 +90,6 @@ public class OGamePad
                 _buttonsHeld.Add(b, GCore.FrameStart);
 
         _cacheMovement = null;
-    }
-
-    void RaiseEventForButton(ePadButton button, Action down, Action up, Action held)
-    {
-        ButtonState curr = GetState(_current, button);
-        ButtonState prev = GetState(_previous, button);
-        if (curr == ButtonState.Pressed && prev == ButtonState.Released)
-            down?.Invoke();
-        else if (curr == ButtonState.Released && prev == ButtonState.Pressed)
-            up?.Invoke();
-        else if (curr == ButtonState.Pressed)
-            held?.Invoke();
     }
 
     public bool WasButtonPressed(ePadButton button)
