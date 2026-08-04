@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace Fulcrum;
 
@@ -126,8 +127,8 @@ public class FulcrumGame : Game
         });
 
 
-        // if (!GCore.IsLoaded || (_skipEveryOtherFrame && _Frame % 2 == 0))
-        //     SuppressDraw();
+        if (!GCore.IsLoaded || (_skipEveryOtherFrame && _Frame % 2 == 0))
+            SuppressDraw();
         base.Update(gameTime);
         GPerf.EndBlock();
     }
@@ -136,8 +137,8 @@ public class FulcrumGame : Game
     //call base._Update if you want to support the debug shortcut key
     protected virtual void _Update()
     {
-        // if (GCore.CanUseDebug && GCore.Press(Keys.OemTilde))
-        //     GCore.Debug = !GCore.Debug;
+        if (GCore.CanUseDebug && GKeyboard.WasPressed(Keys.OemTilde))
+            GCore.Debug = !GCore.Debug;
         //why don't alt keys work?
         //if ((GKeyboard.held(Keys.LeftControl) || GKeyboard.held(Keys.RightControl)) && GKeyboard.press(Keys.Enter))
         //	GScreen.ToggleFullScreen();
