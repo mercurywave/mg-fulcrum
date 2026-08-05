@@ -6,17 +6,23 @@ namespace Fulcrum;
 
 public enum eSceneRunResult { Completed, Cancelled }
 
-public interface IScene : ILayout
+public class IScene : ILayout
 {
+    public OLayout Layout { get; set; }
+    public ComponentTree Tree { get; set; }
     public OScene SceneData { get; set; }
-    public OLoad _DynamicContent => null; // specify a content manager that is loaded and unloaded like magic
-    public OLoad _StaticContent => null; // loaded once when needed
-    public async Task DoLoadAsync() { } // called every time 
-    public void RequestClose() => SceneData.CloseRequested = true;
-    public void OnClose() { }
-    public void DoUnload() { }
-    // This isn't a spoke because the scene manager sets it up before it's added to the tree
+    public virtual OLoad _DynamicContent => null; // specify a content manager that is loaded and unloaded like magic
+    public virtual OLoad _StaticContent => null; // loaded once when needed
 
+
+    public virtual async Task _DoLoadAsync() { } // called every time 
+    public void RequestClose() => SceneData.CloseRequested = true;
+    public virtual void _OnClose() { }
+    public virtual void _DoUnload() { }
+
+    public virtual void OnLayout() { }
+
+    // This isn't a spoke because the scene manager sets it up before it's added to the tree
 }
 
 internal enum eInitState { New, Initialized, Running }
@@ -61,22 +67,22 @@ public class OScene
 
         await helper(Scene._DynamicContent);
 
-        await Scene.DoLoadAsync();
+        await Scene._DoLoadAsync();
 
         _loadStage = eLoadStage.Done;
     }
     internal void Unload()
     {
         _loadStage = eLoadStage.Waiting;
-        Scene.DoUnload();
+        Scene._DoUnload();
         Scene._DynamicContent?.Unload();
     }
 }
 
-public interface ISceneResult<T> : IScene
+public class ISceneResult<T> : IScene
 {
     public T DefaultReturn { get; }
-    public Task<(eSceneRunResult Result, T Output)> _AsyncRunGetResult();
+    public async Task<(eSceneRunResult Result, T Output)> _AsyncRunGetResult() { throw new NotImplementedException(); }
 }
 
 public class ITransition : IAnimation
