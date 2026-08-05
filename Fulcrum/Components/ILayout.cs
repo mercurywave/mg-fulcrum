@@ -61,6 +61,18 @@ public class OLayout
         set => Bind(eEdge.Bottom, value);
     }
 
+    public void CenterVertically(int pos)
+    {
+        Top = pos - Height / 2;
+        Bottom = pos + Height / 2;
+    }
+
+    public void CenterHorizontally(int pos)
+    {
+        Left = pos - Width / 2;
+        Right = pos + Width / 2;
+    }
+
     private bool IsDimBound(eEdge edge) => (BoundDims & edge.AsFlag()) > 0;
     private bool IsDimBound(eSize size) => (BoundDims & size.AsFlag()) > 0;
 

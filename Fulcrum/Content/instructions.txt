@@ -1,0 +1,1 @@
+The FulcromCore folder needs to be copied to implementing projects and assets need to be added to content.mgcb within project file

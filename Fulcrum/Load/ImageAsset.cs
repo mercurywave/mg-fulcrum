@@ -68,11 +68,15 @@ public class ImageAsset : IAsset
 
     public void BlitStretched(Rectangle target)
         => GDraw.Stretched(_tex, target, Color.White);
+    public void BlitStretched(FRectangle target)
+        => GDraw.Stretched(_tex, target.TopLeft, target.Size, Color.White);
     public void BlitStretched(Vector2 topLeft, Vector2 size)
         => GDraw.Stretched(_tex, topLeft, size, Color.White);
 
     public void BlitStretched(Rectangle target, Color multiply)
         => GDraw.Stretched(_tex, target, multiply);
+    public void BlitStretched(FRectangle target, Color multiply)
+        => GDraw.Stretched(_tex, target.TopLeft, target.Size, multiply);
     public void BlitStretched(Vector2 topLeft, Vector2 size, Color multiply)
         => GDraw.Stretched(_tex, topLeft, size, multiply);
 }

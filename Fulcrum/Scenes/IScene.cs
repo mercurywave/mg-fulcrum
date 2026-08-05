@@ -19,6 +19,7 @@ public class IScene : ILayout
     public void RequestClose() => SceneData.CloseRequested = true;
     public virtual void _OnClose() { }
     public virtual void _DoUnload() { }
+    public virtual void _Init() { }
 
     public virtual void OnLayout() { }
 
@@ -61,15 +62,15 @@ public class OScene
     {
         _loadStage = eLoadStage.Started;
 
-        Func<OLoad, Task> helper = async (l) => { if (l != null) await l.AsyncLoad(); };
+        await Scene._StaticContent?.AsyncLoad();
 
-        await helper(Scene._StaticContent);
-
-        await helper(Scene._DynamicContent);
+        await Scene._DynamicContent?.AsyncLoad();
 
         await Scene._DoLoadAsync();
 
         _loadStage = eLoadStage.Done;
+
+        Scene._Init();
     }
     internal void Unload()
     {
