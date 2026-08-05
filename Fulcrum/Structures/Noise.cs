@@ -154,166 +154,166 @@ public class SimplexNoise
 
 }
 
-// public class PerlinNoise
-// {
-//     double[,,] layers;
-//     double[,,] seeds;
-//     double[,] combined;
-//     OGrid<double> shape;
-//     int _w, _h, d;
-//     public static Random Seed = new Random();
+public class PerlinNoise
+{
+    double[,,] layers;
+    double[,,] seeds;
+    double[,] combined;
+    Grid<double> shape;
+    int _w, _h, d;
+    public static Random Seed = new Random();
 
-//     // w/h are the grid used by perlin, you can Sample to pick readings proportional to another sized grid
+    // w/h are the grid used by perlin, you can Sample to pick readings proportional to another sized grid
 
-//     public PerlinNoise(int w, int h, int d, OGrid<double> shape = null)
-//     {
-//         this._w = w;
-//         this._h = h;
-//         this.d = d;
-//         seeds = new double[d, w, h];
-//         layers = new double[d, w, h];
-//         combined = new double[w, h];
-//         this.shape = shape;
-//         Build();
-//     }
+    public PerlinNoise(int w, int h, int d, Grid<double> shape = null)
+    {
+        this._w = w;
+        this._h = h;
+        this.d = d;
+        seeds = new double[d, w, h];
+        layers = new double[d, w, h];
+        combined = new double[w, h];
+        this.shape = shape;
+        Build();
+    }
 
-//     public void Build()
-//     {
-//         if (shape == null)
-//         {
-//             for (int i = 0; i < d; i++)
-//                 Reseed(i);
-//             for (int i = 0; i < d; i++)
-//                 BuildLayer(i);
-//         }
-//         else
-//         {
-//             for (int i = 0; i < d - 1; i++)
-//                 Reseed(i);
-//             for (int i = 0; i < d - 1; i++)
-//                 BuildLayer(i);
-//             DefineShape();
-//         }
-//         CombineLayers();
-//     }
+    public void Build()
+    {
+        if (shape == null)
+        {
+            for (int i = 0; i < d; i++)
+                Reseed(i);
+            for (int i = 0; i < d; i++)
+                BuildLayer(i);
+        }
+        else
+        {
+            for (int i = 0; i < d - 1; i++)
+                Reseed(i);
+            for (int i = 0; i < d - 1; i++)
+                BuildLayer(i);
+            DefineShape();
+        }
+        CombineLayers();
+    }
 
-//     // should always return between 0-1
-//     public double Val(int x, int y)
-//     {
-//         return combined[mod(x, _w), mod(y, _h)];
-//     }
+    // should always return between 0-1
+    public double Val(int x, int y)
+    {
+        return combined[mod(x, _w), mod(y, _h)];
+    }
 
-//     // where w/h is the size of the grid you want to populate - value will be interpolated relative to that
-//     public float Sample(int x, int y, int w, int h)
-//     {
-//         x = mod(x, w); y = mod(y, h); // would need to adjust this if I wanted to support tesselation
-//         Vector2 target = new Vector2(1f * x * (_w - 1) / w, 1f * y * (_h - 1) / h);
-//         var ptNW = new Point((int)target.X, (int)target.Y);
-//         var proportion = target - ptNW.ToVector2();
-//         var NW = (float)Val(x, y);
-//         var NE = (float)Val(x + 1, y);
-//         var SW = (float)Val(x, y + 1);
-//         var SE = (float)Val(x + 1, y + 1);
-//         var lerpTop = GMath.Lerp(NW, NE, proportion.X);
-//         var lerpBottom = GMath.Lerp(SW, SE, proportion.X);
-//         return GMath.Lerp(lerpTop, lerpBottom, proportion.Y);
-//     }
+    // where w/h is the size of the grid you want to populate - value will be interpolated relative to that
+    public float Sample(int x, int y, int w, int h)
+    {
+        x = mod(x, w); y = mod(y, h); // would need to adjust this if I wanted to support tesselation
+        Vector2 target = new Vector2(1f * x * (_w - 1) / w, 1f * y * (_h - 1) / h);
+        var ptNW = new Point((int)target.X, (int)target.Y);
+        var proportion = target - ptNW.ToVector2();
+        var NW = (float)Val(x, y);
+        var NE = (float)Val(x + 1, y);
+        var SW = (float)Val(x, y + 1);
+        var SE = (float)Val(x + 1, y + 1);
+        var lerpTop = GMath.Lerp(NW, NE, proportion.X);
+        var lerpBottom = GMath.Lerp(SW, SE, proportion.X);
+        return GMath.Lerp(lerpTop, lerpBottom, proportion.Y);
+    }
 
-//     int mod(int div, int rem)
-//     {
-//         if (div < 0) return rem + (div % rem) - 1;
-//         return div % rem;
-//     }
+    int mod(int div, int rem)
+    {
+        if (div < 0) return rem + (div % rem) - 1;
+        return div % rem;
+    }
 
-//     void Reseed(int i)
-//     {
-//         for (int x = 0; x < _w; x++)
-//             for (int y = 0; y < _h; y++)
-//                 seeds[i, x, y] = Seed.NextDouble();
-//     }
+    void Reseed(int i)
+    {
+        for (int x = 0; x < _w; x++)
+            for (int y = 0; y < _h; y++)
+                seeds[i, x, y] = Seed.NextDouble();
+    }
 
-//     void BuildLayer(int i)
-//     {
-//         for (int y = 0; y < _h; y++)
-//             for (int x = 0; x < _w; x++)
-//                 layers[i, x, y] = Extrapolate(i, x, y);
-//     }
+    void BuildLayer(int i)
+    {
+        for (int y = 0; y < _h; y++)
+            for (int x = 0; x < _w; x++)
+                layers[i, x, y] = Extrapolate(i, x, y);
+    }
 
-//     void DefineShape()
-//     {
-//         for (int x = 0; x < _w; x++)
-//             for (int y = 0; y < _h; y++)
-//                 layers[d - 1, x, y] = ExtrapolateFromShape(x, y);
-//     }
+    void DefineShape()
+    {
+        for (int x = 0; x < _w; x++)
+            for (int y = 0; y < _h; y++)
+                layers[d - 1, x, y] = ExtrapolateFromShape(x, y);
+    }
 
-//     void CombineLayers()
-//     {
-//         for (int x = 0; x < _w; x++)
-//             for (int y = 0; y < _h; y++)
-//                 combined[x, y] = FinalValue(x, y);
-//     }
+    void CombineLayers()
+    {
+        for (int x = 0; x < _w; x++)
+            for (int y = 0; y < _h; y++)
+                combined[x, y] = FinalValue(x, y);
+    }
 
-//     double FinalValue(int x, int y)
-//     {
-//         double ret = 0;
-//         for (int i = 0; i < d; i++)
-//             ret += layers[i, x, y] / Math.Pow(2, d - i);
-//         return ret;
-//     }
+    double FinalValue(int x, int y)
+    {
+        double ret = 0;
+        for (int i = 0; i < d; i++)
+            ret += layers[i, x, y] / Math.Pow(2, d - i);
+        return ret;
+    }
 
-//     double Extrapolate(int i, int x, int y)
-//     {
-//         int factor = (int)Math.Pow(2, i);
-//         double dx, dy;
-//         dx = (double)x / factor;
-//         dy = (double)y / factor;
+    double Extrapolate(int i, int x, int y)
+    {
+        int factor = (int)Math.Pow(2, i);
+        double dx, dy;
+        dx = (double)x / factor;
+        dy = (double)y / factor;
 
-//         double fx, fy;
-//         fx = dx - Math.Floor(dx);
-//         fy = dy - Math.Floor(dy);
+        double fx, fy;
+        fx = dx - Math.Floor(dx);
+        fy = dy - Math.Floor(dy);
 
-//         double v1, v2, v3, v4;
-//         v1 = seeds[i, (int)(dx) % (_w / factor), (int)(dy) % (_h)]; //divide h by factor to repeat pattern vertically
-//         v2 = seeds[i, (int)(dx + 1) % (_w / factor), (int)(dy) % (_h)];
-//         v3 = seeds[i, (int)(dx) % (_w / factor), (int)(dy + 1) % (_h)];
-//         v4 = seeds[i, (int)(dx + 1) % (_w / factor), (int)(dy + 1) % (_h)];
+        double v1, v2, v3, v4;
+        v1 = seeds[i, (int)(dx) % (_w / factor), (int)(dy) % (_h)]; //divide h by factor to repeat pattern vertically
+        v2 = seeds[i, (int)(dx + 1) % (_w / factor), (int)(dy) % (_h)];
+        v3 = seeds[i, (int)(dx) % (_w / factor), (int)(dy + 1) % (_h)];
+        v4 = seeds[i, (int)(dx + 1) % (_w / factor), (int)(dy + 1) % (_h)];
 
-//         double temp1, temp2;
-//         temp1 = Interpolate(v1, v2, fx);
-//         temp2 = Interpolate(v3, v4, fx);
+        double temp1, temp2;
+        temp1 = Interpolate(v1, v2, fx);
+        temp2 = Interpolate(v3, v4, fx);
 
-//         return Interpolate(temp1, temp2, fy);
-//     }
+        return Interpolate(temp1, temp2, fy);
+    }
 
-//     double ExtrapolateFromShape(int x, int y)
-//     {
-//         double dx, dy;
-//         dx = (double)x * (shape.W - 1) / _w;
-//         dy = (double)y * (shape.H - 1) / _h;
+    double ExtrapolateFromShape(int x, int y)
+    {
+        double dx, dy;
+        dx = (double)x * (shape.W - 1) / _w;
+        dy = (double)y * (shape.H - 1) / _h;
 
-//         double fx, fy;
-//         fx = dx - Math.Floor(dx);
-//         fy = dy - Math.Floor(dy);
+        double fx, fy;
+        fx = dx - Math.Floor(dx);
+        fy = dy - Math.Floor(dy);
 
-//         double v1, v2, v3, v4;
-//         v1 = shape.Get((int)(dx) % (shape.W), (int)(dy) % (shape.H));
-//         v2 = shape.Get((int)(dx + 1) % (shape.W), (int)(dy) % (shape.H));
-//         v3 = shape.Get((int)(dx) % (shape.W), (int)(dy + 1) % (shape.H));
-//         v4 = shape.Get((int)(dx + 1) % (shape.W), (int)(dy + 1) % (shape.H));
+        double v1, v2, v3, v4;
+        v1 = shape.Get((int)(dx) % (shape.W), (int)(dy) % (shape.H));
+        v2 = shape.Get((int)(dx + 1) % (shape.W), (int)(dy) % (shape.H));
+        v3 = shape.Get((int)(dx) % (shape.W), (int)(dy + 1) % (shape.H));
+        v4 = shape.Get((int)(dx + 1) % (shape.W), (int)(dy + 1) % (shape.H));
 
-//         double temp1, temp2;
-//         temp1 = Interpolate(v1, v2, fx);
-//         temp2 = Interpolate(v3, v4, fx);
+        double temp1, temp2;
+        temp1 = Interpolate(v1, v2, fx);
+        temp2 = Interpolate(v3, v4, fx);
 
-//         return Interpolate(temp1, temp2, fy);
-//     }
+        return Interpolate(temp1, temp2, fy);
+    }
 
-//     double Interpolate(double a, double b, double x)
-//     {
-//         //return a * (1 - x) + b * x;
-//         double ft, f;
-//         ft = x * Math.PI;
-//         f = (1 - Math.Cos(ft)) * .5;
-//         return a * (1 - f) + b * f;
-//     }
-// }
+    double Interpolate(double a, double b, double x)
+    {
+        //return a * (1 - x) + b * x;
+        double ft, f;
+        ft = x * Math.PI;
+        f = (1 - Math.Cos(ft)) * .5;
+        return a * (1 - f) + b * f;
+    }
+}
