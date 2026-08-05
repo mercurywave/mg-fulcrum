@@ -40,18 +40,12 @@ public class Grid<T>
     public T GetRelative(Point pt, int dx, int dy) => _Get(pt.X + dx, pt.Y + dy);
     public bool InGrid(Point pt) => InGrid(pt.X, pt.Y);
     public bool InGrid(int x, int y)
-    {
-        return (x >= 0 && x < W && y >= 0 && y < H);
-    }
+        => x >= 0 && x < W && y >= 0 && y < H;
     public bool OnEdge(Point pos)
-    {
-        return (pos.X == 0 || pos.X == W - 1 || pos.Y == 0 || pos.Y == H - 1);
-    }
+        => pos.X == 0 || pos.X == W - 1 || pos.Y == 0 || pos.Y == H - 1;
 
     public T GetSafe(Point pos)
-    {
-        return _arr[pos.X, pos.Y];
-    }
+        => _arr[pos.X, pos.Y];
     public IEnumerable<Point> AllPos()
     {
         List<Point> list = new List<Point>();
@@ -170,15 +164,9 @@ public class Grid<T>
                 yield return new Point(x, y);
     }
 
-    public void Set(Point pos, T val)
-    {
-        _arr[pos.X, pos.Y] = val;
-    }
+    public void Set(Point pos, T val) => _arr[pos.X, pos.Y] = val;
 
-    public void Set(int x, int y, T val)
-    {
-        _arr[x, y] = val;
-    }
+    public void Set(int x, int y, T val) => _arr[x, y] = val;
 
     public void Fill(T val)
     {
